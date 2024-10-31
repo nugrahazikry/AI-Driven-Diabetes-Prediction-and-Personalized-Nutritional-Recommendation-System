@@ -46,22 +46,27 @@ streamlit run streamlit_code.py
 
 ### 3. **Generate a Diabetes Prediction and AI health insights**
   After entering the health data, click the Predict button. This will provide a diabetes prediction for user and AI-generated health insights based on the provided data.
+  
   ![Diabetes health insights](https://github.com/nugrahazikry/healthkathon-diabetes-prediction-cyber-warriors/blob/main/dataset/Prediction%20health%20data%20insights.png)
 
 ### 4. **Navigate to the Food Recommendation Page**
   Move to the Food Recommendation page, where you can select your food choices for breakfast, lunch, and dinner.
+  
   ![Food recommendation page fill data](https://github.com/nugrahazikry/healthkathon-diabetes-prediction-cyber-warriors/blob/main/dataset/Food%20recommendation%20fill%20data.png)
 
 ### 5. **Get Food Recommendations and AI food insights**
   Click the Get Recommendation button to receive AI-driven healthy food recommendations. The AI will assess each food choice and provide insights on whether it is recommended for consumption based on your health profile.
+  
   ![Food recommendation insights](https://github.com/nugrahazikry/healthkathon-diabetes-prediction-cyber-warriors/blob/main/dataset/food%20recommendation%20insights.png)
 
 ### 6. **Navigate to the Food composition image Nutritional Analysis page**
   Go to the Food Composition Image Nutritional Analysis section, where you can upload an image containing the nutritional details of a product for AI-based analysis and insights.
+  
   ![Food image composition fill data](https://github.com/nugrahazikry/healthkathon-diabetes-prediction-cyber-warriors/blob/main/dataset/Food%20composition%20picture%20analysis%20fill%20data.png)
 
 ### 7. **Generate Health Insights from the Food composition image and recommendation**
   After uploading the image, click the Analyze Product Image button. The AI will use OCR to interpret the nutritional content and provide health insights, recommending whether the product is suitable for consumption.
+  
   ![Food image example](https://github.com/nugrahazikry/healthkathon-diabetes-prediction-cyber-warriors/blob/main/dataset/Food%20picture%20composition%20for%20analysis.png)
   ![Food image insights](https://github.com/nugrahazikry/healthkathon-diabetes-prediction-cyber-warriors/blob/main/dataset/Food%20composition%20picture%20analysis%20insights.png)
 
