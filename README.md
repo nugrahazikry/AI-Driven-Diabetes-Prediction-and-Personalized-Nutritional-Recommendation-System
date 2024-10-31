@@ -2,10 +2,10 @@
 This project integrates machine learning and AI to support personalized diabetes management and health improvement through data-driven insights and food recommendations. By predicting diabetes status from patient health data, the system offers tailored health advice. Using these predictions, it suggests traditional foods appropriate for various stages of diabetes and provides health insights based on selected foods. Additionally, a computer vision component with OCR detects nutritional information from food labels, allowing AI to offer real-time health guidance based on nutritional content. Together, these components provide a comprehensive, personalized approach to diabetes care and dietary management.
 
 ## Description
-1. **Diabetes Prediction**  
+### 1. **Diabetes Prediction**  
    Apply machine learning to predict a patient’s diabetes status based on their health data and use AI to generate tailored health insights and recommendations accordingly.
 
-2. **Food Recommendation**  
+### 2. **Food Recommendation**  
    Use machine learning to provide food recommendations based on diabetes prediction results and health data, focusing on traditional foods suitable for individuals at various stages of diabetes. Additionally, use AI to generate health insights based on the selected foods.
 
 3. **Computer Vision AI Food Recommendation**  
