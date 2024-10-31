@@ -74,4 +74,4 @@ streamlit run streamlit_code.py
 Contributors names and contact info: 
 1. **[Diki Rustian](https://github.com/dikirust)**: Built the Diabetes Prediction feature using machine learning.
 2. **[Muhammad Fikri Fadillah](https://github.com/boxside)**: Created the personalized food with Indonesian local cuisine recommendation feature.
-3. **[Zikry Adjie Nugraha](https://github.com/nugrahazikry)**: Developed the Streamlit interface and implemented the Computer Vision AI Food Recommendation feature.
+3. **[Zikry Adjie Nugraha](https://github.com/nugrahazikry)**: Developed the Streamlit interface, implemented the Computer Vision AI Food Recommendation feature, and integrated all features with AI to gather health insights.
