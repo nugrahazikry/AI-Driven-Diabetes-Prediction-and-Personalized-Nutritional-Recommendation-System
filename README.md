@@ -17,41 +17,41 @@ pip install -r requirements.txt
 
 ### InstallingAPI Keys Setup
 1. API Keys Setup
-   To use the AI functionalities in the project, create a .env file in the project’s root directory. This file should store your API keys in the following format:
+To use the AI functionalities in the project, create a .env file in the project’s root directory. This file should store your API keys in the following format:
 ```
 OPENAI_API_KEY=your_openai_api_key
 GEMINI_AI_API_KEY=your_gemini_ai_api_key
 ```
-   Replace your_openai_api_key and your_gemini_ai_api_key with your actual OpenAI and Gemini API keys.
+Replace your_openai_api_key and your_gemini_ai_api_key with your actual OpenAI and Gemini API keys.
 
 2. Environment Configuration
-   Having this .env file is essential, as it allows secure access to the AI services within the project.
+Having this .env file is essential, as it allows secure access to the AI services within the project.
 
 ### Executing program
 Once dependencies and API keys are set up, follow these steps to run and interact with the project:
 
 1. Launch the Application
-   Run the main Streamlit application file by executing:
+Run the main Streamlit application file by executing:
 ```
 streamlit run streamlit_code.py
 ```
 2. Access the Prediction Page
-   On the first page, input the relevant health data, including glucose levels, blood pressure, weight, height, age, and gender for diabetes assessment.
+On the first page, input the relevant health data, including glucose levels, blood pressure, weight, height, age, and gender for diabetes assessment.
 
 3. Generate a Diabetes Prediction and AI health insights
-   After entering the health data, click the Predict button. This will provide a diabetes prediction for user and AI-generated health insights based on the provided data.
+After entering the health data, click the Predict button. This will provide a diabetes prediction for user and AI-generated health insights based on the provided data.
 
 4. Navigate to the Food Recommendation Page
-   Move to the Food Recommendation page, where you can select your food choices for breakfast, lunch, and dinner.
+Move to the Food Recommendation page, where you can select your food choices for breakfast, lunch, and dinner.
 
 5. Get Food Recommendations and AI food insights
-   Click the Get Recommendation button to receive AI-driven healthy food recommendations. The AI will assess each food choice and provide insights on whether it is recommended for consumption based on your health profile.
+Click the Get Recommendation button to receive AI-driven healthy food recommendations. The AI will assess each food choice and provide insights on whether it is recommended for consumption based on your health profile.
 
 6. Navigate to the Fodd composition image Nutritional Analysis page
-   Go to the Food Composition Image Nutritional Analysis section, where you can upload an image containing the nutritional details of a product for AI-based analysis and insights.44
+Go to the Food Composition Image Nutritional Analysis section, where you can upload an image containing the nutritional details of a product for AI-based analysis and insights.44
 
 7. Generate Health Insights from the Food composition image and recommendation
-   After uploading the image, click the Analyze Product Image button. The AI will use OCR to interpret the nutritional content and provide health insights, recommending whether the product is suitable for consumption.
+After uploading the image, click the Analyze Product Image button. The AI will use OCR to interpret the nutritional content and provide health insights, recommending whether the product is suitable for consumption.
 
 ## Authors
 Contributors names and contact info: 
