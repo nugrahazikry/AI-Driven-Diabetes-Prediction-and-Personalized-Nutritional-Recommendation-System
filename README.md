@@ -42,6 +42,8 @@ streamlit run streamlit_code.py
 ### 2. **Access the Prediction Page**
   On the first page, input the relevant health data, including glucose levels, blood pressure, weight, height, age, and gender for diabetes assessment.
 
+  ![Prediciton page fill data](https://github.com/nugrahazikry/healthkathon-diabetes-prediction-cyber-warriors/blob/main/dataset/Diabetes%20health%20data.png)
+
 ### 3. **Generate a Diabetes Prediction and AI health insights**
   After entering the health data, click the Predict button. This will provide a diabetes prediction for user and AI-generated health insights based on the provided data.
 
