@@ -40,14 +40,13 @@ model_generative = genai.GenerativeModel(model_name='gemini-1.5-flash')
 st.set_page_config(page_title="Analisa diabetes dan kesehatan", layout="centered")
 
 # Load Diabetes ML Model
-# model = pd.read_pickle('../model_list/best_model.pkl')
 model = pd.read_pickle('model_list/best_model.pkl')
 
 # Load diabetes dataset
-df = pd.read_csv('../dataset/diabetes.csv')
+df = pd.read_csv('dataset/diabetes.csv')
 
 # Load the food dataset
-data = pd.read_csv('../dataset/food_calories_dataset.csv',sep=';')
+data = pd.read_csv('dataset/food_calories_dataset.csv',sep=';')
 data['makanan'] = data['makanan']+' '+ data['porsi']
 
 # Data cleaning on food dataset
