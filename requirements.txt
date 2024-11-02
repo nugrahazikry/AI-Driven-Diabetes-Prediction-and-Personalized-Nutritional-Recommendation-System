@@ -9,3 +9,4 @@ numpy==1.26.4
 pydantic==2.9.2
 matplotlib==3.7.2
 seaborn==0.12.2
+python-dotenv==1.0.1
