@@ -75,8 +75,8 @@ streamlit run streamlit_code.py
   ![Food image example](https://github.com/nugrahazikry/healthkathon-diabetes-prediction-cyber-warriors/blob/main/dataset/Food%20picture%20composition%20for%20analysis.png)
   ![Food image insights](https://github.com/nugrahazikry/healthkathon-diabetes-prediction-cyber-warriors/blob/main/dataset/Food%20composition%20picture%20analysis%20insights.png)
 
-# Authors
+# Contributors
 Contributors names and contact info: 
-1. **[Diki Rustian](https://github.com/dikirust)**: Built the Diabetes Prediction feature using machine learning.
-2. **[Muhammad Fikri Fadillah](https://github.com/boxside)**: Created the personalized food with Indonesian local cuisine recommendation feature.
-3. **[Zikry Adjie Nugraha](https://github.com/nugrahazikry)**: Developed the Streamlit interface, implemented the Computer Vision AI Food Recommendation feature, and integrated all features with AI to gather health insights.
+1. **[Zikry Adjie Nugraha](https://github.com/nugrahazikry)**: Developed the Streamlit interface, implemented the Computer Vision AI Food Recommendation feature, and integrated all features with AI to gather health insights.
+2. **[Diki Rustian](https://github.com/dikirust)**: Built the Diabetes Prediction feature using machine learning.
+3. **[Muhammad Fikri Fadillah](https://github.com/boxside)**: Created the personalized food with Indonesian local cuisine recommendation feature.
