@@ -1,5 +1,10 @@
-# Diabetes Prediction and Food Recommendation using AI
+# AI Driven Diabetes Prediction and Personalized Food Nutritional Analysis Insights
 This project integrates machine learning and AI to support personalized diabetes management and health improvement through data-driven insights and food recommendations. By predicting diabetes status from patient health data, the system offers tailored health advice. Using these predictions, it suggests traditional foods appropriate for various stages of diabetes and provides health insights based on selected foods. Additionally, a computer vision component with OCR detects nutritional information from food labels, allowing AI to offer real-time health guidance based on nutritional content. Together, these components provide a comprehensive, personalized approach to diabetes care and dietary management.
+
+# Application Demo
+You can try the application yourself in here:
+
+https://ai-driven-diabetes-prediction-and-personalized-nutrition-insig.streamlit.app/
 
 ## Description
 ### 1. **Diabetes Prediction**  
