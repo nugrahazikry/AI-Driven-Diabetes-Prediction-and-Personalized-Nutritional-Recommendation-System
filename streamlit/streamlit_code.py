@@ -25,12 +25,12 @@ import os
 # Load environment variables from .env file
 load_dotenv("../.env")
 
-OPEN_AI_API_KEY = os.getenv('OPEN_API_KEY')
+# OPEN_AI_API_KEY = os.getenv('OPEN_API_KEY')
 GEN_AI_API_KEY = os.getenv('GEN_AI_API_KEY')
 
 ## Define AI configuration, dataset, and ML model
 # Configure the GPT 4o mini
-gpt_llm = ChatOpenAI(model='gpt-4o-mini', temperature=0, openai_api_key=OPEN_AI_API_KEY)
+# gpt_llm = ChatOpenAI(model='gpt-4o-mini', temperature=0, openai_api_key=OPEN_AI_API_KEY)
 
 # Configure the Generative AI model
 genai.configure(api_key=GEN_AI_API_KEY)
@@ -379,14 +379,14 @@ if st.session_state.page == "Prediction":
                     """
 
                     # # Using Gemini
-                    # st.session_state.response_advice = model_generative.generate_content(diabetes_advice_prompt)
-                    # st.session_state.response_advice_text = st.session_state.response_advice.text
+                    st.session_state.response_advice = model_generative.generate_content(diabetes_advice_prompt)
+                    st.session_state.response_advice_text = st.session_state.response_advice.text
 
                     # Using GPT 4o mini
-                    prompt = ChatPromptTemplate.from_template(diabetes_advice_prompt)
-                    chain = prompt | gpt_llm
-                    response = chain.invoke({})
-                    st.session_state.response_advice_text = response.content
+                    # prompt = ChatPromptTemplate.from_template(diabetes_advice_prompt)
+                    # chain = prompt | gpt_llm
+                    # response = chain.invoke({})
+                    # st.session_state.response_advice_text = response.content
                     
                     # Remove all asterisks (*) from the string
                     st.session_state.response_advice_text = re.sub(r"\*", "", st.session_state.response_advice_text)
@@ -784,14 +784,14 @@ elif st.session_state.page == "Food recommendation":
 
                 """
                 # # Using Gemini AI
-                # st.session_state. response_food_recommend = model_generative.generate_content(food_recommendation_prompt)
-                # st.session_state.response_food_recommend_text = st.session_state.response_food_recommend.text
+                st.session_state. response_food_recommend = model_generative.generate_content(food_recommendation_prompt)
+                st.session_state.response_food_recommend_text = st.session_state.response_food_recommend.text
 
                 # Using GPT 4o mini
-                prompt_food_recommend = ChatPromptTemplate.from_template(food_recommendation_prompt)
-                chain_food_recommend = prompt_food_recommend | gpt_llm
-                response_food_recommend = chain_food_recommend.invoke({})
-                st.session_state.response_food_recommend_text = response_food_recommend.content
+                # prompt_food_recommend = ChatPromptTemplate.from_template(food_recommendation_prompt)
+                # chain_food_recommend = prompt_food_recommend | gpt_llm
+                # response_food_recommend = chain_food_recommend.invoke({})
+                # st.session_state.response_food_recommend_text = response_food_recommend.content
 
                 # Remove all asterisks (*) from the string
                 st.session_state.response_food_recommend_text_recommend = re.sub(r"\*", "", st.session_state.response_food_recommend_text)
@@ -1142,14 +1142,14 @@ elif st.session_state.page == "Upload File":
                     """
 
                     # # Using Gemini AI
-                    # st.session_state.response = model_generative.generate_content(prompt_analisa)
-                    # st.session_state.response_text = st.session_state.response.text
+                    st.session_state.response = model_generative.generate_content(prompt_analisa)
+                    st.session_state.response_text = st.session_state.response.text
 
                     # Using GPT 4o mini
-                    prompt = ChatPromptTemplate.from_template(prompt_analisa)
-                    chain = prompt | gpt_llm
-                    response = chain.invoke({})
-                    st.session_state.response_text = response.content
+                    # prompt = ChatPromptTemplate.from_template(prompt_analisa)
+                    # chain = prompt | gpt_llm
+                    # response = chain.invoke({})
+                    # st.session_state.response_text = response.content
 
                     st.session_state.response_text = re.sub(r"\*", "", st.session_state.response_text)
 
