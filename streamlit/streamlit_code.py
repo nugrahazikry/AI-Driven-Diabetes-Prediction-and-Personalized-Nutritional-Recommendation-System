@@ -211,6 +211,19 @@ if 'jenis_kelamin' not in st.session_state:
 
 ## Page 1: Diabetes Prediction 
 if st.session_state.page == "Prediction":
+    st.markdown("""
+    <div style="text-align: center; margin-bottom: 20px;">
+        <strong>Created by:</strong><br>
+        <a href="https://www.linkedin.com/in/zikry" target="_blank" style="text-decoration: none; color: blue;">
+            1. Zikry
+        </a>: Contributed on blabla<br>
+        <a href="https://www.linkedin.com/in/fikri" target="_blank" style="text-decoration: none; color: blue;">
+            2. Fikri
+        </a>: Contributed on contiewqeqwe
+    </div>
+    """, unsafe_allow_html=True)
+    
+    
     st.markdown("<h2 style='margin: 0; color: black; text-align: center; border: 2px solid red;'><strong>🏥💊 Prediksi level diabetes & kesehatan gizimu!</strong></h2>", unsafe_allow_html=True)
     st.subheader('Masukkan data kesehatanmu')
     st.markdown(
