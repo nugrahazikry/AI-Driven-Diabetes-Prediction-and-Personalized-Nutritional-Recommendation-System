@@ -216,7 +216,7 @@ if st.session_state.page == "Prediction":
     st.markdown("""
     <div style="text-align: center; margin-bottom: 20px;">
         <br><strong>Created by:</strong>
-        <a href="www.linkedin.com/in/nugrahazikry" target="_blank" style="text-decoration: none; color: blue;">Zikry Adjie Nugraha</a>, 
+        <a href="https://www.linkedin.com/in/nugrahazikry" target="_blank" style="text-decoration: none; color: blue;">Zikry Adjie Nugraha</a>, 
         <a href="https://www.linkedin.com/in/diki-rustian/" target="_blank" style="text-decoration: none; color: blue;">Diki Rustian</a>, 
         <a href="https://www.linkedin.com/in/mff/" target="_blank" style="text-decoration: none; color: blue;">Muhammad Fikri Fadillah</a>
     </div>
