@@ -223,7 +223,7 @@ if st.session_state.page == "Prediction":
     """, unsafe_allow_html=True)
     
     
-    st.subheader('Masukkan data kesehatanmu hahhhhhhh')
+    st.subheader('Masukkan data kesehatanmu')
     st.markdown(
         """
         <style>
