@@ -215,16 +215,10 @@ if st.session_state.page == "Prediction":
     st.markdown("<h2 style='margin: 0; color: black; text-align: center; border: 2px solid red;'><strong>🏥💊 Prediksi level diabetes & kesehatan gizimu!</strong></h2>", unsafe_allow_html=True)
     st.markdown("""
     <div style="text-align: center; margin-bottom: 20px;">
-        <strong>Created by:</strong>
-        <a href="www.linkedin.com/in/nugrahazikry" target="_blank" style="text-decoration: none; color: blue;">
-            Zikry Adjie Nugraha
-        </a>, 
-        <a href="https://www.linkedin.com/in/diki-rustian/" target="_blank" style="text-decoration: none; color: blue;">
-            Diki Rustian
-        </a>, 
-        <a href="https://www.linkedin.com/in/mff/" target="_blank" style="text-decoration: none; color: blue;">
-            Muhammad Fikri Fadillah
-        </a>, 
+        <strong>Created by:</strong><br>
+        <a href="www.linkedin.com/in/nugrahazikry" target="_blank" style="text-decoration: none; color: blue;">Zikry Adjie Nugraha</a>, 
+        <a href="https://www.linkedin.com/in/diki-rustian/" target="_blank" style="text-decoration: none; color: blue;">Diki Rustian</a>, 
+        <a href="https://www.linkedin.com/in/mff/" target="_blank" style="text-decoration: none; color: blue;">Muhammad Fikri Fadillah</a>
     </div>
     """, unsafe_allow_html=True)
     
