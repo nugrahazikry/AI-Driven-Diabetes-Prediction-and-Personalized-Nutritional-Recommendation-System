@@ -34,7 +34,7 @@ GEN_AI_API_KEY = os.getenv('GEN_AI_API_KEY')
 
 # Configure the Generative AI model
 genai.configure(api_key=GEN_AI_API_KEY)
-model_generative = genai.GenerativeModel(model_name='gemini-1.5-flash')
+model_generative = genai.GenerativeModel(model_name='gemini-2.0-flash-lite')
 
 # Optimize the page layout for mobile
 st.set_page_config(page_title="Analisa diabetes dan kesehatan", layout="centered")
