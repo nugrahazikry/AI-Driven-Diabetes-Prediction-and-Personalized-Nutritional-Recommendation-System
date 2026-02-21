@@ -10,3 +10,5 @@ pydantic==2.9.2
 matplotlib==3.7.2
 seaborn==0.12.2
 python-dotenv==1.0.1
+pyparsing >= 3.3.0
+httplib2 >= 0.31.0
