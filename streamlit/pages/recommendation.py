@@ -31,32 +31,6 @@ def render():
     ss = st.session_state
     data = ss._food_data  # loaded once in app.py
 
-    # ── Fix for "arrow_right" icon text bug in Streamlit Cloud ───────────────
-    st.markdown(
-        """
-        <style>
-        /* Hide broken Material Icon text (arrow_right) in expander headers */
-        [data-testid="stExpander"] details summary span.st-emotion-cache-p5msec,
-        [data-testid="stExpander"] details summary span[class*="emotion-cache"] {
-            visibility: hidden;
-            width: 0;
-            height: 0;
-            overflow: hidden;
-            position: absolute;
-        }
-        /* Ensure expander label text remains visible */
-        [data-testid="stExpander"] details summary p,
-        [data-testid="stExpander"] [data-testid="stMarkdownContainer"] {
-            visibility: visible !important;
-            position: relative !important;
-            width: auto !important;
-            height: auto !important;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
     # ── Header ───────────────────────────────────────────────────────────────
     st.markdown(
         '<div style="background-color: #ffffff; padding: 0px; margin-top: 20px; '
@@ -98,18 +72,16 @@ def render():
         with cold:
             st.markdown(f"#### {pecahin} Menu")
             for recipe in part_nutri:
-                # Use styled container instead of expander to avoid icon rendering issues
-                st.markdown(
-                    f"""<div style='background-color: #f0f2f6; padding: 10px; 
-                    border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #ff4b4b;'>
-                    <strong>🍽️ {recipe["makanan"]}</strong></div>""",
-                    unsafe_allow_html=True,
-                )
-                with st.expander("View nutrition info", expanded=False):
+                with st.expander(recipe["makanan"]):
+                    st.markdown(
+                        '<h5 style="text-align: center; font-family: sans-serif;">'
+                        "Nutritional Values (g):</h5>",
+                        unsafe_allow_html=True,
+                    )
                     nutri_df = pd.DataFrame(
                         {v: [recipe[v]] for v in _NUTRITION_KEYS}
                     ).T.rename(columns={0: "Composition"})
-                    st.dataframe(nutri_df, use_container_width=True)
+                    st.dataframe(nutri_df)
 
     # ── User meal selection ──────────────────────────────────────────────────
     st.subheader("Choose your meal:")
