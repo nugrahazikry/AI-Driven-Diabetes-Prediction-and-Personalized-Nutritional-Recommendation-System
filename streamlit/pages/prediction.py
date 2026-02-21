@@ -100,8 +100,11 @@ def _run_prediction(model):
     # BMI
     ss.BMI = round(ss.Weight / (ss.Height / 100) ** 2, 2)
 
-    # Feature vector
-    data = np.array([[ss.Glucose, ss.BloodPressure, ss.BMI, ss.Age]])
+    # Feature vector — use a DataFrame with the same feature names the model was trained with
+    data = pd.DataFrame(
+        [[ss.Glucose, ss.BloodPressure, ss.BMI, ss.Age]],
+        columns=["Glucose", "BloodPressure", "BMI", "Age"],
+    )
 
     # BMR / BMI helpers
     bmr_raw = calculate_bmr(ss.Weight, ss.Height / 100, ss.Age, ss.Jenis_Kelamin)

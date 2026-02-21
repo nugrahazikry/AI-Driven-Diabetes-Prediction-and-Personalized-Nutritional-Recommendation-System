@@ -25,7 +25,8 @@ def data_cleaning_food_dataset(dirpath):
     for col in col_prep:
         data[col] = data[col].fillna(0).astype(str)
         data[col] = np.where(
-            data[col].str.contains('(mg)'),
+            # Treat the literal string '(mg)' (avoid regex groups warning)
+            data[col].str.contains('(mg)', regex=False),
             (data[col].str.replace(r'[a-zA-Z]', '', regex=True).astype(float) / 1000).astype(float),
             data[col].str.replace(r'[a-zA-Z]', '', regex=True).astype(float)
         )
