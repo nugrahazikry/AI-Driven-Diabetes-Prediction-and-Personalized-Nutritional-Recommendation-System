@@ -64,7 +64,7 @@ def render():
 
         st.markdown("<h4>Your activity plan:</h4>", unsafe_allow_html=True)
         st.session_state.aktivitas = st.select_slider(
-            "",
+            "Activity level",
             options=[
                 "Sedentary (No exercise)",
                 "Light (exercise 1-2 times per week)",
