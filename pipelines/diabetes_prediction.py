@@ -1,5 +1,6 @@
 import configuration.constants as constants
 import re
+import traceback
 
 # Calculates Basal Metabolic Rate (BMR) based on the Harris-Benedict formula for men and women.
 def calculate_bmr(weight, height, age, sex):
@@ -84,10 +85,11 @@ def diabetes_advice_prompt_process(health_data):
     try:
         response_advice = constants.model_generative.generate_content(diabetes_advice_prompt)
         response_advice_text = getattr(response_advice, "text", None)
-    except Exception:
-        # If the generative API fails (quota, credentials, etc.), return None so callers
-        # can handle the absence of AI output gracefully.
-        return None
+    except Exception as e:
+        # If the generative API fails (quota, credentials, etc.), return None and
+        # the formatted traceback so callers can show diagnostic information.
+        tb = traceback.format_exc()
+        return None, tb
 
     # Using GPT 4o mini (fallback example)
     # prompt = ChatPromptTemplate.from_template(diabetes_advice_prompt)

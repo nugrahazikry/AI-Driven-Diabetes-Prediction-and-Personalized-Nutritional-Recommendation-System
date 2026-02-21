@@ -137,12 +137,23 @@ def _run_prediction(model):
         f"diabetes status: {ss.kondisi_pasien}\n"
     )
 
-    # AI advice
-    response_text = diabetes_advice_prompt_process(ss.data_kesehatan)
+    # AI advice — capture traceback if the pipeline returns it
+    _result = diabetes_advice_prompt_process(ss.data_kesehatan)
+    response_text = None
+    traceback_text = None
+    if isinstance(_result, tuple):
+        response_text, traceback_text = _result
+    else:
+        response_text = _result
+
     if not response_text:
-        st.error("AI advice is currently unavailable. Please try again later.")
+        msg = "AI advice is currently unavailable. Please try again later."
+        if traceback_text:
+            msg = msg + "\n\nTraceback (most recent call last):\n" + traceback_text
+        st.error(msg)
         ss.reasons_markdown_conclusion = None
         return
+
     _parse_advice_response(response_text)
 
 
