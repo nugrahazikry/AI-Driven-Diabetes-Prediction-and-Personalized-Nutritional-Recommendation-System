@@ -8,28 +8,46 @@ https://ai-driven-diabetes-prediction-and-personalized-nutrition-insig.streamlit
 
 # Project Structure
 ```
-final/
- app.py                          # Flask web server & REST API endpoints
- requirements.txt
- .env                            # API keys (not committed)
- template/
-    index.html                  # Main HTML frontend
- static/
-    css/styles.css              # Stylesheet
-    js/app.js                   # Frontend JavaScript
- configuration/
-    constants.py                # App-wide constants & ML model loader
- pipelines/
-    diabetes_prediction.py      # BMI/BMR calculation & AI health advice
-    food_recommendation.py      # Food recommendation logic & AI insights
-    image_analysis.py           # OCR + AI nutritional analysis
- utils/
-    data/cleaning.py            # Food dataset cleaning utilities
- data/
-    dataset/                    # CSV datasets
-    analysis_input/             # Sample food label images
- model/                          # Trained ML model files
- notebooks/                      # Exploratory / training notebooks
+project-repo/
+├── app.py                          # Flask web server & REST API endpoints
+├── requirements.txt                # Python dependencies
+├── .env                            # API keys and environment variables (not committed)
+├── .gitignore                      # Files and folders to ignore in Git (e.g., .env, __pycache__/)
+├── README.md                       # Project overview and setup instructions
+│
+├── templates/                      # (Renamed from 'template') Main HTML frontend
+│   └── index.html                  
+│
+├── static/                         # Static assets (Served directly to the client)
+│   ├── css/
+│   │   └── styles.css              # Stylesheet
+│   └── js/
+│       └── app.js                  # Frontend JavaScript
+│
+├── configuration/                  # App configurations
+│   ├── __init__.py                 
+│   └── constants.py                # App-wide constants & ML model loader
+│
+├── pipelines/                      # Core business logic and ML integration
+│   ├── __init__.py                 
+│   ├── diabetes_prediction.py      # BMI/BMR calculation & AI health advice
+│   ├── food_recommendation.py      # Food recommendation logic & AI insights
+│   └── image_analysis.py           # OCR + AI nutritional analysis
+│
+├── utils/                          # Helper functions
+│   ├── __init__.py                 
+│   └── data/
+│       ├── __init__.py             
+│       └── cleaning.py             # Food dataset cleaning utilities
+│
+├── data/                           # Local data storage (Often ignored in version control)
+│   ├── dataset/                    # CSV datasets
+│   └── analysis_input/             # Sample food label images
+│
+├── model/                          # Trained ML model files (.pkl, .h5, etc.)
+│
+└── notebooks/                      # Exploratory Data Analysis & training notebooks
+    └── exploratory_analysis.ipynb
 ```
 
 # Description
