@@ -72,8 +72,7 @@ for key, default in _DEFAULTS.items():
 
 
 # ── Page routing ─────────────────────────────────────────────────────────────
-# NOTE: We can't use `from streamlit.pages.X import ...` because "streamlit"
-# collides with the installed streamlit package.  Load by file path instead.
+# Pages are loaded by file path to avoid any future naming conflicts.
 
 
 def _import_page(name: str, filepath: str):
@@ -82,9 +81,9 @@ def _import_page(name: str, filepath: str):
     spec.loader.exec_module(mod)
     return mod.render
 
-render_prediction   = _import_page("pages.prediction",     "streamlit/pages/prediction.py")
-render_recommendation = _import_page("pages.recommendation", "streamlit/pages/recommendation.py")
-render_upload       = _import_page("pages.upload",          "streamlit/pages/upload.py")
+render_prediction   = _import_page("pages.prediction",     "ui/pages/prediction.py")
+render_recommendation = _import_page("pages.recommendation", "ui/pages/recommendation.py")
+render_upload       = _import_page("pages.upload",          "ui/pages/upload.py")
 
 _PAGES = {
     "Prediction": render_prediction,
