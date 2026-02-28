@@ -591,9 +591,9 @@ function buildUploadPage() {
   const warning = document.getElementById('upload-prediction-warning');
   const gated   = document.getElementById('upload-gated-content');
 
-  // Always show the upload area — just show/hide the warning
+  // Show gated content and warning based on prediction state
   if (warning) warning.classList.toggle('hidden', hasPrediction);
-  if (gated)   gated.classList.remove('hidden');
+  if (gated)   gated.classList.toggle('hidden', !hasPrediction);
 
   if (hasPrediction) buildUploadHealthCards('upload-health-cards');
 }
@@ -675,6 +675,30 @@ async function analyzeImage() {
     alert('Error: ' + err.message);
   } finally {
     setButtonLoading(btn, false);
+  }
+}
+
+async function loadSampleImage() {
+  try {
+    var res  = await fetch('/api/sample-image');
+    if (!res.ok) throw new Error('Could not load sample image.');
+    var blob = await res.blob();
+    var fileName = 'Food picture composition for analysis.png';
+    var file = new File([blob], fileName, { type: 'image/png' });
+    STATE.uploadedImage = file;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      STATE.previewUrl = e.target.result;
+      document.getElementById('preview-img').src = e.target.result;
+      document.getElementById('preview-filename').textContent = fileName;
+      document.getElementById('upload-zone').style.display    = 'none';
+      document.getElementById('upload-preview').style.display = 'flex';
+      document.getElementById('image-analysis-results').classList.add('hidden');
+      document.getElementById('upload-info').classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+  } catch (err) {
+    alert('Error loading sample image: ' + err.message);
   }
 }
 

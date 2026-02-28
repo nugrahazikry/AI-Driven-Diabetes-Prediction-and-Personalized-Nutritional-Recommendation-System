@@ -1,8 +1,9 @@
 """
 app.py — Flask web server for Healthkaton.
 
-Serves the HTML frontend from the website/ directory and exposes
-REST API endpoints for ML prediction, food recommendation, and image analysis.
+Serves the HTML frontend from template/index.html and static assets from
+static/css/ and static/js/. Exposes REST API endpoints for ML prediction,
+food recommendation, and image analysis.
 
 Run with:  python app.py
 """
@@ -16,12 +17,12 @@ ROOT_DIR = Path(__file__).resolve().parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, render_template
 import numpy as np
 import pandas as pd
 
 from configuration import constants
-from utils.data.cleaning import data_cleaning_food_dataset
+from utils.data_cleaning import data_cleaning_food_dataset
 from pipelines.diabetes_prediction import (
     calculate_bmr,
     calculate_daily_calories,
@@ -36,13 +37,13 @@ _ml_model   = constants.model
 _food_data  = data_cleaning_food_dataset("data/dataset/food_calories_dataset.csv")
 
 # ── Flask app ────────────────────────────────────────────────────────────────
-app = Flask(__name__, static_folder="website", static_url_path="")
+app = Flask(__name__, static_folder="static", static_url_path="/static", template_folder="template")
 
 
 # ── Static / index ───────────────────────────────────────────────────────────
 @app.route("/")
 def index():
-    return send_from_directory("website", "index.html")
+    return render_template("index.html")
 
 
 # ── API: Diabetes Prediction ─────────────────────────────────────────────────
@@ -288,6 +289,13 @@ def api_food_analysis():
     except Exception as e:
         return jsonify({"error": str(e), "sections": [], "ok": False}), 500
 
+# ── API: Sample Image ───────────────────────────────────────────────────────────
+@app.route("/api/sample-image")
+def api_sample_image():
+    from flask import send_from_directory
+    sample_dir  = ROOT_DIR / "data" / "analysis_input"
+    sample_file = "Food picture composition for analysis.png"
+    return send_from_directory(str(sample_dir), sample_file, mimetype="image/png")
 
 # ── Run ──────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":

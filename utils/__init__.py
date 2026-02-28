@@ -25,4 +25,4 @@ Submodules:
 # )
 
 # from utils.helpers.common import switch_page, update_kelamin
-from utils.data.cleaning import data_cleaning_food_dataset
+from utils.data_cleaning import data_cleaning_food_dataset

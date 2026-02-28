@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Diabetes &amp; Health Analysis</title>
-  <link rel="stylesheet" href="styles.css?v=7" />
+  <link rel="stylesheet" href="/static/css/styles.css?v=7" />
 </head>
 <body>
 
   <!-- ═══════════════════════════  HEADER  ══════════════════════════════ -->
   <header class="app-header">
-    <a class="header-logo" href="#">Health<span>katon</span></a>
+    <a class="header-logo" href="#">HEALTH<span>KATON</span> BPJS KESEHATAN 2024 TOP 10 FINALIST PROJECT AI CATEGORY</a>
     <p class="header-subtitle">
       By
       <a href="https://www.linkedin.com/in/nugrahazikry" target="_blank">Zikry Adjie Nugraha</a>,
@@ -87,7 +87,7 @@
             </div>
             <div class="form-group">
               <label for="gender">Gender</label>
-              <select id="gender" name="gender" class="select-input">
+              <select id="gender" name="gender" class="select-input-light">
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
               </select>
@@ -163,6 +163,8 @@
         <h1>Food Recommendations for You</h1>
         <p class="sub">Personalised meal suggestions based on your health profile.</p>
       </div>
+
+      <div class="page-content-card">
 
       <h3>Your health data:</h3>
       <div id="rec-health-cards" class="health-cards-area"></div>
@@ -249,6 +251,8 @@
         <button class="nav-page-btn" onclick="switchPage('prediction')">🩺 Back to health page</button>
         <button class="nav-page-btn" onclick="switchPage('upload')">📸 Analyze product photo</button>
       </div>
+
+      </div><!-- /.page-content-card -->
     </section>
 
     <!-- ══════════════════  PAGE 3 – UPLOAD FILE  ══════════════════════ -->
@@ -258,6 +262,8 @@
         <h1>Food Composition Photo Analysis</h1>
         <p class="sub">Upload a product label photo for AI-powered nutritional analysis.</p>
       </div>
+
+      <div class="page-content-card">
 
       <h3>Your health data:</h3>
       <div id="upload-health-cards" class="health-cards-area"></div>
@@ -271,10 +277,13 @@
         </div>
       </div>
 
-      <!-- Gated content — temporarily un-gated for testing -->
-      <div id="upload-gated-content">
+      <!-- Gated content — hidden until prediction is run -->
+      <div id="upload-gated-content" class="hidden">
 
-      <h3>Upload Product Composition Photo</h3>
+      <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+        <h3 style="margin:0;">Upload Product Composition Photo</h3>
+        <button type="button" class="btn-primary" onclick="loadSampleImage()" style="padding:7px 16px; font-size:.8rem;">🖼️ Sample input</button>
+      </div>
 
       <!-- Hidden file input — handler attached inline so it always works -->
       <input type="file" id="file-input" accept="image/jpeg,image/png,.jpg,.jpeg,.png" style="display:none" />
@@ -316,7 +325,7 @@
       </div>
 
       <!-- Debug area (temporary) -->
-      <div id="upload-debug" style="display:block;margin-top:8px;color:#b33;font-size:.95rem;"></div>
+      <div id="upload-debug" style="display:none;margin-top:8px;color:#b33;font-size:.95rem;"></div>
 
       <div class="btn-center" style="margin-top:20px;">
         <button class="btn-primary" id="analyse-image-btn" onclick="analyzeImage()">
@@ -333,7 +342,7 @@
       </div><!-- /#upload-gated-content -->
 
       <!-- Global debug (hidden in production) -->
-      <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+      <div style="display:none;gap:8px;align-items:center;margin-top:8px;">
         <div id="upload-debug-global" style="display:none;color:#b33;font-size:.95rem;"></div>
       </div>
 
@@ -362,6 +371,8 @@
         <button class="nav-page-btn" onclick="switchPage('prediction')">🩺 Back to health page</button>
         <button class="nav-page-btn" onclick="switchPage('recommendation')">🍔 Food recommendation</button>
       </div>
+
+      </div><!-- /.page-content-card -->
     </section>
 
   </main>
@@ -374,7 +385,7 @@
     </p>
   </footer>
 
-  <script src="app.js?v=18"></script>
+  <script src="/static/js/app.js?v=18"></script>
   <!-- Debug banner removed -->
 </body>
 </html>
