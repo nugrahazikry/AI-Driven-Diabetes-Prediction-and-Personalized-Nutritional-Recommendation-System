@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Upload Test</title></head>
+<body style="font-family:sans-serif;max-width:600px;margin:40px auto;padding:20px;">
+  <h1>Upload Test Page</h1>
+  <p>If you can see an image after selecting a file, the upload works.</p>
+
+  <input type="file" id="picker" accept="image/*" />
+
+  <div id="output" style="margin-top:20px;padding:20px;border:2px dashed #ccc;min-height:100px;text-align:center;color:#999;">
+    No image selected yet
+  </div>
+
+  <script>
+    document.getElementById('picker').addEventListener('change', function() {
+      var file = this.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('output').innerHTML =
+          '<img src="' + e.target.result + '" style="max-width:100%;max-height:400px;" />' +
+          '<p>' + file.name + '</p>';
+      };
+      reader.readAsDataURL(file);
+    });
+  </script>
+</body>
+</html>

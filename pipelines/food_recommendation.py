@@ -59,34 +59,41 @@ def recommend(dataframe,_input,ingredients=[],params={'n_neighbors':5,'return_di
 
 # Generates nutrition recommendations based on calorie needs for each meal.
 def generate_nutrisi(data_part_input, recommendations, bmr):
-    recommended_nutrition=[]
+    recommended_nutrition = []
     makanan_list = []
-    data_part_copy = data_part_input.copy()
-    # for meal,kalori_butuh in st.session_state.recommendations.items():
-    for meal,kalori_butuh in recommendations.items():
-        
-        # meal_calories = kalori_butuh*st.session_state.bmr
+
+    for meal, kalori_butuh in recommendations.items():
         meal_calories = kalori_butuh * bmr
-        
-        if meal=='Breakfast':        
-            recommended_nutrition_part = [meal_calories,rnd(10,25),rnd(0,5),rnd(0,0.1),rnd(0,0.8),rnd(20,60),rnd(4,10),rnd(0,3),rnd(5,30)]
-            data_part_copy = data_part_copy[data_part_copy['Kalori'] <= meal_calories]
-        elif meal=='Lunch':
-            recommended_nutrition_part = [meal_calories,rnd(20,40),rnd(0,5),rnd(0,0.2),rnd(0,1.200),rnd(40,75),rnd(4,20),rnd(0,3),rnd(20,47)]
-            data_part_copy = data_part_copy[data_part_copy['Kalori'] <= meal_calories]
-        elif meal=='Dinner':
-            recommended_nutrition_part = [meal_calories,rnd(20,30),rnd(0,5),rnd(0,0.2),rnd(0,1.200),rnd(40,75),rnd(4,20),rnd(0,3),rnd(20,47)] 
-            data_part_copy = data_part_copy[data_part_copy['Kalori'] <= meal_calories]
-        
-        generator = recommend(data_part_copy,recommended_nutrition_part,ingredients=[],params={'n_neighbors':5,'return_distance':False})
 
-        for item in generator.to_dict('records'):
-            makanan_value = item.get('makanan', 'No value found')
-            makanan_list.append(makanan_value)  # Add to list
+        # Always start from the full dataset for each meal, then:
+        #   1. filter by calorie budget for this specific meal
+        #   2. exclude items already chosen in previous meals
+        data_meal = data_part_input.copy()
+        data_meal = data_meal[data_meal['Kalori'] <= meal_calories]
+        data_meal = data_meal[~data_meal['makanan'].isin(makanan_list)]
 
-        data_part_copy = data_part_copy[~data_part_copy['makanan'].isin(makanan_list)]
-        
-        recommended_nutrition.append(generator.to_dict('records'))
+        if meal == 'Breakfast':
+            recommended_nutrition_part = [meal_calories, rnd(10,25), rnd(0,5), rnd(0,0.1), rnd(0,0.8), rnd(20,60), rnd(4,10), rnd(0,3), rnd(5,30)]
+        elif meal == 'Lunch':
+            recommended_nutrition_part = [meal_calories, rnd(20,40), rnd(0,5), rnd(0,0.2), rnd(0,1.2), rnd(40,75), rnd(4,20), rnd(0,3), rnd(20,47)]
+        elif meal == 'Dinner':
+            recommended_nutrition_part = [meal_calories, rnd(20,30), rnd(0,5), rnd(0,0.2), rnd(0,1.2), rnd(40,75), rnd(4,20), rnd(0,3), rnd(20,47)]
+        else:
+            recommended_nutrition.append([])
+            continue
+
+        generator = recommend(data_meal, recommended_nutrition_part, ingredients=[], params={'n_neighbors': 5, 'return_distance': False})
+
+        # If not enough candidates, skip gracefully
+        if generator is None:
+            recommended_nutrition.append([])
+            continue
+
+        records = generator.to_dict('records')
+        for item in records:
+            makanan_list.append(item.get('makanan', ''))
+
+        recommended_nutrition.append(records)
 
     return recommended_nutrition
 

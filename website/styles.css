@@ -199,13 +199,34 @@ label {
 
 /* Select */
 .select-input {
-  background: var(--bg); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); padding: 9px 12px;
-  font-size: .92rem; color: var(--text); outline: none; width: 100%;
+  background: var(--teal); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 9px 36px 9px 12px;
+  font-size: .92rem; color: #ffffff; outline: none; width: 100%;
   cursor: pointer; font-family: 'Inter', sans-serif;
-  transition: border-color .15s;
+  transition: border-color .15s, background .15s;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23ffffff' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
 }
-.select-input:focus { border-color: var(--teal); }
+.select-input option {
+  background: var(--surface);
+  color: var(--text);
+}
+.select-input:focus { border-color: var(--teal-mid); outline: 2px solid var(--teal-lt); outline-offset: 1px; }
+
+/* Make native checkboxes/radios use white when checked */
+input[type="checkbox"], input[type="radio"] {
+  accent-color: #ffffff; /* modern browsers */
+}
+
+/* Fallback: force white background for checked boxes on older browsers */
+input[type="checkbox"]:checked {
+  background-color: #ffffff;
+  border-color: #ffffff;
+}
 
 /* Activity slider */
 .activity-group {
@@ -247,6 +268,19 @@ label {
 .btn-primary:disabled{ background: var(--subtle); cursor: not-allowed; transform: none; }
 .btn-spinner { margin-left: 4px; }
 .hidden { display: none !important; }
+
+/* Reset image — top-right corner of the upload preview card */
+.btn-reset-corner {
+  position: absolute; top: 12px; right: 12px;
+  background: var(--teal); color: #fff; border: none;
+  padding: 7px 16px; border-radius: var(--radius-sm);
+  font-size: .8rem; font-weight: 600; cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: background .15s, transform .1s;
+  z-index: 1;
+}
+.btn-reset-corner:hover  { background: var(--teal-mid); transform: translateY(-1px); }
+.btn-reset-corner:active { transform: translateY(0); }
 
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 .btn-spinner { animation: pulse 1.1s infinite; }
@@ -350,6 +384,7 @@ label {
 .table-wrapper {
   width: 100%; overflow-x: auto; margin-bottom: 24px;
   border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-xs);
+  background: #fff; /* table card background */
 }
 .table-wrapper table { width: 100%; border-collapse: collapse; }
 .table-wrapper th {
@@ -359,8 +394,22 @@ label {
 .table-wrapper td {
   padding: 10px 14px; border-top: 1px solid var(--border);
   font-size: .87rem; vertical-align: top; color: var(--text);
+  background: #fff; /* ensure row cells use white background */
 }
-.table-wrapper tr:hover td { background: var(--bg); }
+.table-wrapper tr:hover td { background: #fbfbfb; }
+
+/* Limit visible rows for long nutrition tables and allow vertical scroll */
+#nutritional-content-table.table-wrapper {
+  max-height: 380px; /* roughly 7 rows visible (adjust if needed) */
+  overflow-y: auto;
+}
+
+/* Make header sticky so it remains visible while scrolling */
+.table-wrapper thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
 
 /* â”€â”€â”€ Advice list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .advice-list {
@@ -375,10 +424,10 @@ label {
 .page-title-banner { text-align: center; margin-bottom: 36px; }
 .page-title-banner h1, .page-title-banner h2 {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(1.4rem, 3.5vw, 2rem);
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
   color: var(--text); margin-bottom: 6px;
 }
-.page-title-banner .sub { color: var(--muted); font-size: .88rem; }
+.page-title-banner .sub { color: var(--muted); font-size: .9rem; }
 .upload-banner h2 { font-size: clamp(1.2rem, 2.5vw, 1.7rem); }
 
 /* â”€â”€â”€ Food grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -435,33 +484,18 @@ label {
 }
 
 /* â”€â”€â”€ Upload zone â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-.upload-zone {
-  border: 2px dashed var(--border); border-radius: var(--radius-lg);
-  background: var(--surface); min-height: 160px;
+/* ─── Upload zone ──────────────────────────────────────────────────────── */
+#upload-zone {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  position: relative; transition: border-color .2s, background .2s; cursor: pointer; overflow: hidden;
+  gap: 10px; padding: 40px 28px; cursor: pointer; text-align: center;
+  border: 2px dashed var(--border); border-radius: var(--radius-lg);
+  background: var(--surface); transition: border-color .2s, background .2s;
+  user-select: none;
 }
-.upload-zone:hover { border-color: var(--teal); background: var(--teal-lt); }
-.upload-zone.drag-over { border-color: var(--teal); background: var(--teal-lt); }
-.upload-zone input[type="file"] {
-  position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
-}
-.upload-label {
-  display: flex; flex-direction: column; align-items: center;
-  gap: 8px; pointer-events: none; padding: 28px; text-align: center;
-}
-.upload-icon  { font-size: 2rem; }
-.upload-label p { font-size: .9rem; color: var(--muted); margin: 0; }
-.upload-hint    { font-size: .78rem; color: var(--subtle) !important; }
-.upload-preview {
-  width: 100%; display: flex; flex-direction: column; align-items: center;
-  padding: 16px; pointer-events: none;
-}
-.upload-preview img {
-  max-height: 200px; max-width: 100%;
-  border-radius: var(--radius); box-shadow: var(--shadow-sm); object-fit: contain;
-}
-.preview-filename { margin-top: 8px; font-size: .8rem; color: var(--muted); }
+#upload-zone:hover { border-color: var(--teal); background: var(--teal-lt); }
+.upload-icon       { font-size: 2.2rem; }
+.upload-label-text { font-size: .85rem; font-weight: 600; letter-spacing: .05em; color: var(--muted); }
+.upload-label-sub  { font-size: .75rem; color: var(--subtle, #aaa); }
 
 /* â”€â”€â”€ Info box â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .info-box {
@@ -479,12 +513,7 @@ label {
 }
 
 /* â”€â”€â”€ Image display â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-#uploaded-img-display { text-align: center; margin-bottom: 20px; }
-#uploaded-img-display img {
-  max-height: 260px; max-width: 100%;
-  border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border);
-}
-#uploaded-img-display p { margin-top: 6px; color: var(--muted); font-size: .8rem; }
+/* uploaded image display removed */
 
 /* â”€â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .app-footer {
@@ -497,3 +526,44 @@ label {
 /* â”€â”€â”€ Misc utility â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 h3 { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--subtle); margin: 28px 0 12px; }
 h4 { font-size: .88rem; }
+
+/* Larger section headings per user request */
+/* Recommendation page headings */
+#page-recommendation h3 {
+  font-size: 1.05rem; /* slightly larger */
+  color: var(--text);
+}
+
+/* Upload / Analyze page headings */
+#page-upload h3 {
+  font-size: 1.05rem;
+  color: var(--text);
+}
+
+/* Prediction page headings */
+#page-prediction h3 {
+  font-size: 1.05rem;
+  color: var(--text);
+}
+
+
+/*  Prediction-required warning  */
+.prediction-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: var(--radius);
+  padding: 18px 22px;
+  margin-bottom: 28px;
+}
+.warning-icon { font-size: 1.4rem; flex-shrink: 0; line-height: 1; margin-top: 2px; }
+.prediction-warning strong { font-size: .92rem; color: var(--amber); display: block; margin-bottom: 3px; }
+.prediction-warning p { font-size: .87rem; color: var(--muted); margin: 0; line-height: 1.55; }
+.warning-link {
+  background: none; border: none; padding: 0;
+  color: var(--teal); font-size: .87rem; font-weight: 600;
+  cursor: pointer; text-decoration: underline; font-family: 'Inter', sans-serif;
+}
+.warning-link:hover { color: var(--teal-mid); }

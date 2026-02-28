@@ -3,16 +3,34 @@ from PIL import Image, UnidentifiedImageError
 import mimetypes
 import google.generativeai as genai
 import re
+import tempfile
+import os
 
 def image_ocr_nutrition(uploaded_file):
-    # Attempt to open the image
-    image = Image.open(uploaded_file)  # Open and store the image
+    # Read bytes so we can use the same data for both PIL and genai
+    # uploaded_file may be a Flask FileStorage or a file-like object
+    file_bytes = uploaded_file.read()
 
-    # Determine the MIME type based on the file extension
-    mime_type, _ = mimetypes.guess_type(uploaded_file.name)
+    # Rewind stream so PIL can also read it
+    import io
+    image = Image.open(io.BytesIO(file_bytes))
 
-    # Upload the file to the generative AI model with the mime_type
-    myfile = genai.upload_file(uploaded_file, mime_type=mime_type)
+    # Determine the MIME type from the original filename
+    filename = getattr(uploaded_file, 'filename', None) or getattr(uploaded_file, 'name', 'image.jpg')
+    mime_type, _ = mimetypes.guess_type(filename)
+    if not mime_type:
+        mime_type = 'image/jpeg'
+
+    # Write to a temp file so genai.upload_file gets a real path
+    suffix = os.path.splitext(filename)[-1] or '.jpg'
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+        tmp.write(file_bytes)
+        tmp_path = tmp.name
+
+    try:
+        myfile = genai.upload_file(tmp_path, mime_type=mime_type)
+    finally:
+        os.unlink(tmp_path)
 
     # Define the OCR prompt
     prompt_ocr = """

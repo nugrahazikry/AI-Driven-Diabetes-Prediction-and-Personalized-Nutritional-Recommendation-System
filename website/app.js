@@ -6,11 +6,11 @@
 'use strict';
 
 // ── App State ────────────────────────────────────────────────────────────────
-const STATE = {
+var STATE = {
   page:        'prediction',
   // Prediction inputs
-  glucose:     0, bloodPressure: 0, age: 0,
-  weight:      0, height: 0,
+  glucose:     100, bloodPressure: 100, age: 100,
+  weight:      100, height: 100,
   gender:      'Male', activity:  'Sedentary (No exercise)',
   // Computed
   bmi: null, bmr: null, daily: null,
@@ -23,6 +23,7 @@ const STATE = {
   recommended: { breakfast: [], lunch: [], dinner: [] },
   // Image upload
   uploadedImage: null,
+  previewUrl: null,
 };
 
 const ACTIVITY_LABELS = [
@@ -94,7 +95,7 @@ function switchPage(pageName) {
 
   // Populate health cards if navigating to pages that need them
   if (pageName === 'recommendation') buildRecommendationPage();
-  if (pageName === 'upload')          buildUploadHealthCards();
+  if (pageName === 'upload')          buildUploadPage();
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -136,16 +137,50 @@ function initPredictForm() {
     if (!validatePredictForm()) return;
 
     collectPredictInputs();
-    runCalculations();
 
     const btn  = document.getElementById('predict-btn');
     setButtonLoading(btn, true);
-    await simulateDelay(1800);
-    setButtonLoading(btn, false);
 
-    renderPredictionResults();
-    document.getElementById('prediction-results').classList.remove('hidden');
-    document.getElementById('prediction-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    try {
+      const res = await fetch('/api/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          glucose:       STATE.glucose,
+          bloodPressure: STATE.bloodPressure,
+          age:           STATE.age,
+          weight:        STATE.weight,
+          height:        STATE.height,
+          gender:        STATE.gender,
+          activity:      STATE.activity,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Prediction failed.');
+
+      // Store results in STATE
+      STATE.isDiabetic  = data.isDiabetic;
+      STATE.bmi         = data.bmi;
+      STATE.bmiCategory = data.bmiCategory;
+      STATE.bmiColor    = data.bmiColor;
+      STATE.daily       = data.daily;
+      STATE.bmr1        = data.bmr1;
+      STATE.bmr2        = data.bmr2;
+      STATE.bmr3        = data.bmr3;
+      STATE.glucose     = data.glucose;
+      STATE.healthRows  = data.healthRows;
+      STATE.adviceLines = data.adviceLines;
+      STATE.conclusion  = data.conclusion;
+      STATE.dataString  = data.dataString;
+
+      renderPredictionResults();
+      document.getElementById('prediction-results').classList.remove('hidden');
+      document.getElementById('prediction-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (err) {
+      alert('Error: ' + err.message);
+    } finally {
+      setButtonLoading(btn, false);
+    }
   });
 }
 
@@ -291,34 +326,101 @@ function renderPredictionResults() {
 //  FOOD RECOMMENDATION PAGE
 // ════════════════════════════════════════════════════════════════════════════
 function buildRecommendationPage() {
+  const hasPrediction = STATE.daily !== null;
+  const warning = document.getElementById('rec-prediction-warning');
+  const gated   = document.getElementById('rec-gated-content');
+
+  if (!hasPrediction) {
+    warning.classList.remove('hidden');
+    gated.classList.add('hidden');
+    return;
+  }
+
+  warning.classList.add('hidden');
+  gated.classList.remove('hidden');
+
   buildUploadHealthCards('rec-health-cards');
   buildFoodGrid();
-  populateMealSelects();
 
   document.getElementById('check-nutrition-btn').onclick = async () => {
     const btn = document.getElementById('check-nutrition-btn');
     setButtonLoading(btn, true);
-    await simulateDelay(1800);
-    setButtonLoading(btn, false);
-    renderFoodAnalysis();
-    document.getElementById('food-analysis-results').classList.remove('hidden');
-    document.getElementById('food-analysis-results').scrollIntoView({ behavior: 'smooth' });
+    try {
+      await renderFoodAnalysis();
+    } finally {
+      setButtonLoading(btn, false);
+    }
   };
 }
 
-function buildFoodGrid() {
+async function buildFoodGrid() {
   const grid = document.getElementById('food-grid');
-  grid.innerHTML = '';
+  grid.innerHTML = '<p style="text-align:center">Loading recommendations…</p>';
 
+  try {
+    const res = await fetch('/api/recommend', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ daily: STATE.daily, bmr1: STATE.bmr1, bmr2: STATE.bmr2, bmr3: STATE.bmr3 }),
+    });
+    const data = await res.json();
+
+    // Map API response into FOOD_DB-compatible entries
+    // Robust mapper: accept different casing/column names from API/CSV (e.g. Kalori vs kalori, Lemak vs lemak)
+    const mapMeal = (records, category) => (records || []).map(r => {
+      const get = (...keys) => {
+        for (const k of keys) if (r[k] !== undefined && r[k] !== null) return r[k];
+        return undefined;
+      };
+      const parseNum = v => {
+        if (v === undefined || v === null) return 0;
+        if (typeof v === 'string') v = v.replace(/,/g, '.').replace(/[^0-9.\-]/g, '');
+        const n = parseFloat(v);
+        return Number.isFinite(n) ? n : 0;
+      };
+
+      return {
+        name:             get('makanan', 'nama_makanan', 'nama', 'name') || 'Unknown',
+        category,
+        diabeticFriendly: !!(get('diabetic_friendly', 'diabeticFriendly', 'diabetic') || false),
+        calories:         parseNum(get('Kalori', 'kalori')),
+        fat:              parseNum(get('Lemak', 'lemak')),
+        satFat:           parseNum(get('lemakJenuh', 'lemak_jenuh', 'lemakJenuh')) || 0,
+        chol:             parseNum(get('kolesterol', 'Kolesterol', 'cholesterol')) || 0,
+        sodium:           parseNum(get('sodium', 'Natrium', 'natrium')),
+        carbs:            parseNum(get('karbohidrat', 'Karbohidrat')),
+        fiber:            parseNum(get('serat', 'seratpangan', 'SeratPangan')),
+        sugar:            parseNum(get('gula', 'Gula')),
+        protein:          parseNum(get('protein', 'Protein')),
+      };
+    });
+
+    STATE.recommended.breakfast = mapMeal(data.breakfast, 'breakfast');
+    STATE.recommended.lunch     = mapMeal(data.lunch,     'lunch');
+    STATE.recommended.dinner    = mapMeal(data.dinner,    'dinner');
+
+    // Debug: log raw API rows and mapped results to help diagnose missing values
+    try {
+      console.debug('API raw breakfast rows:', data.breakfast);
+      console.debug('Mapped breakfast:', STATE.recommended.breakfast);
+      console.debug('API raw lunch rows:', data.lunch);
+      console.debug('Mapped lunch:', STATE.recommended.lunch);
+      console.debug('API raw dinner rows:', data.dinner);
+      console.debug('Mapped dinner:', STATE.recommended.dinner);
+    } catch (e) { /* ignore logging errors */ }
+  } catch {
+    // Fallback to hardcoded FOOD_DB if API fails
+    ['breakfast', 'lunch', 'dinner'].forEach(cat => {
+      STATE.recommended[cat] = FOOD_DB.filter(f => f.category === cat && (!STATE.isDiabetic || f.diabeticFriendly));
+    });
+  }
+
+  grid.innerHTML = '';
   const categories = ['breakfast', 'lunch', 'dinner'];
   const labels     = ['🌅 Breakfast Menu', '🌤️ Lunch Menu', '🌙 Dinner Menu'];
 
   categories.forEach((cat, i) => {
-    let items = FOOD_DB.filter(f => f.category === cat);
-    if (STATE.isDiabetic) items = items.filter(f => f.diabeticFriendly);
-
-    STATE.recommended[cat] = items;
-
+    const items = STATE.recommended[cat];
     const col = document.createElement('div');
     col.className = 'food-column';
     col.innerHTML = `<h4>${labels[i]}</h4>`;
@@ -335,9 +437,10 @@ function buildFoodGrid() {
         </div>`;
       col.appendChild(exp);
     });
-
     grid.appendChild(col);
   });
+
+  populateMealSelects();
 }
 
 function toggleFoodItem(header) {
@@ -373,20 +476,17 @@ function populateMealSelects() {
   });
 }
 
-function renderFoodAnalysis() {
+async function renderFoodAnalysis() {
+
   const breakfastName = document.getElementById('sel-breakfast').value;
   const lunchName     = document.getElementById('sel-lunch').value;
   const dinnerName    = document.getElementById('sel-dinner').value;
 
-  const bf = FOOD_DB.find(f => f.name === breakfastName);
-  const lu = FOOD_DB.find(f => f.name === lunchName);
-  const dn = FOOD_DB.find(f => f.name === dinnerName);
+  const bf = STATE.recommended.breakfast.find(f => f.name === breakfastName);
+  const lu = STATE.recommended.lunch.find(f => f.name === lunchName);
+  const dn = STATE.recommended.dinner.find(f => f.name === dinnerName);
 
-  renderMealBlock('breakfast', '🌅 Breakfast menu', bf, STATE.bmr1);
-  renderMealBlock('lunch',     '🌤️ Lunch menu',     lu, STATE.bmr2);
-  renderMealBlock('dinner',    '🌙 Dinner menu',    dn, STATE.bmr3);
-
-  const totalCal = bf.calories + lu.calories + dn.calories;
+  const totalCal = (bf?.calories || 0) + (lu?.calories || 0) + (dn?.calories || 0);
   const diff     = totalCal - STATE.daily;
   const diffText = diff > 0
     ? `${Math.abs(diff)} kcal above your daily target`
@@ -394,12 +494,76 @@ function renderFoodAnalysis() {
     ? `${Math.abs(diff)} kcal below your daily target`
     : 'exactly at your daily calorie target';
 
-  document.getElementById('food-conclusion-box').className = 'conclusion-box neutral';
-  document.getElementById('food-conclusion-box').textContent =
-    `Your selected meals total ${totalCal} kcal, which is ${diffText} of ${STATE.daily} kcal. ` +
-    (STATE.isDiabetic
-      ? 'All recommended meals are diabetic-friendly. Monitor your portions and blood sugar after meals.'
-      : 'Great choices! Maintain variety and consistency for optimal health outcomes.');
+  const concl = document.getElementById('food-conclusion-box');
+  concl.className = 'conclusion-box neutral';
+
+  // Fetch AI reasoning — keep spinner going until this resolves
+  let aiOk = false;
+  try {
+    const res  = await fetch('/api/food-analysis', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        breakfast:  bf  || null,
+        lunch:      lu  || null,
+        dinner:     dn  || null,
+        healthData: STATE.dataString || '',
+      }),
+    });
+    const data = await res.json();
+    if (data.ok && Array.isArray(data.sections) && data.sections.length >= 3) {
+      renderMealBlockAI('breakfast', '🌅 Breakfast menu', bf, STATE.bmr1, data.sections[0]);
+      renderMealBlockAI('lunch',     '🌤️ Lunch menu',     lu, STATE.bmr2, data.sections[1]);
+      renderMealBlockAI('dinner',    '🌙 Dinner menu',    dn, STATE.bmr3, data.sections[2]);
+      // Update conclusion from AI if available
+      const aiConcl = (data.sections[3] || '').replace(/^Conclusion:\s*/i, '').trim();
+      concl.textContent = aiConcl ||
+        `Your selected meals total ${totalCal} kcal, which is ${diffText} of ${STATE.daily} kcal.`;
+      aiOk = true;
+    }
+  } catch (e) { /* fall through to static */ }
+
+  // Only use static rendering if AI failed
+  if (!aiOk) {
+    renderMealBlock('breakfast', '🌅 Breakfast menu', bf, STATE.bmr1);
+    renderMealBlock('lunch',     '🌤️ Lunch menu',     lu, STATE.bmr2);
+    renderMealBlock('dinner',    '🌙 Dinner menu',    dn, STATE.bmr3);
+    concl.textContent =
+      `Your selected meals total ${totalCal} kcal, which is ${diffText} of ${STATE.daily} kcal. ` +
+      (STATE.isDiabetic
+        ? 'All recommended meals are diabetic-friendly. Monitor your portions and blood sugar after meals.'
+        : 'Great choices! Maintain variety and consistency for optimal health outcomes.');
+  }
+
+  document.getElementById('food-analysis-results').classList.remove('hidden');
+  document.getElementById('food-analysis-results').scrollIntoView({ behavior: 'smooth' });
+}
+
+function renderMealBlockAI(meal, icon, food, targetCal, aiText) {
+  const titleEl = document.getElementById(`${meal}-meal-title`);
+  const tableEl = document.getElementById(`${meal}-meal-table`);
+
+  const lines = (aiText || '').split('\n').map(l => l.trim()).filter(Boolean);
+  // First line is the meal header, e.g. "Breakfast menu: Ketoprak..."
+  titleEl.textContent = lines[0] || (food ? `${icon}: ${food.name}` : icon);
+
+  // Parse lines that start with "-" as key: value rows
+  const rows = lines
+    .filter(l => l.startsWith('-'))
+    .map(l => {
+      const clean = l.replace(/^-\s*/, '');
+      const colon = clean.indexOf(':');
+      if (colon === -1) return [clean, ''];
+      return [clean.slice(0, colon).trim(), clean.slice(colon + 1).trim()];
+    })
+    .filter(r => r[0]);
+
+  if (rows.length) {
+    tableEl.innerHTML = buildTable(['Nutrition Info', 'Description'], rows);
+  } else {
+    // Nothing to parse — keep the static fallback
+    renderMealBlock(meal, icon, food, targetCal);
+  }
 }
 
 function renderMealBlock(meal, icon, food, targetCal) {
@@ -422,7 +586,19 @@ function renderMealBlock(meal, icon, food, targetCal) {
 // ════════════════════════════════════════════════════════════════════════════
 //  UPLOAD / IMAGE ANALYSIS PAGE
 // ════════════════════════════════════════════════════════════════════════════
-function buildUploadHealthCards(containerId = 'upload-health-cards') {
+function buildUploadPage() {
+  const hasPrediction = STATE.daily !== null;
+  const warning = document.getElementById('upload-prediction-warning');
+  const gated   = document.getElementById('upload-gated-content');
+
+  // Always show the upload area — just show/hide the warning
+  if (warning) warning.classList.toggle('hidden', hasPrediction);
+  if (gated)   gated.classList.remove('hidden');
+
+  if (hasPrediction) buildUploadHealthCards('upload-health-cards');
+}
+
+function buildUploadHealthCards(containerId) {
   const container = document.getElementById(containerId);
   if (!container || !STATE.daily) {
     if (container) container.innerHTML =
@@ -442,127 +618,147 @@ function buildUploadHealthCards(containerId = 'upload-health-cards') {
     </div>`;
 }
 
-function initImageUpload() {
-  const zone     = document.getElementById('upload-zone');
-  const input    = document.getElementById('file-input');
-  const preview  = document.getElementById('upload-preview');
-  const previewImg = document.getElementById('preview-img');
-  const filename = document.getElementById('preview-filename');
-  const label    = zone.querySelector('.upload-label');
-
-  input.addEventListener('change', () => handleFile(input.files[0]));
-
-  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
-  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-  zone.addEventListener('drop', e => {
-    e.preventDefault();
-    zone.classList.remove('drag-over');
-    handleFile(e.dataTransfer.files[0]);
-  });
-
-  function handleFile(file) {
-    if (!file) return;
-    const ext = file.name.split('.').pop().toLowerCase();
-    if (!['jpg','jpeg','png'].includes(ext)) {
-      alert('Please upload a valid JPG, JPEG, or PNG image file.');
-      return;
-    }
-    STATE.uploadedImage = file;
-    const url = URL.createObjectURL(file);
-    previewImg.src = url;
-    filename.textContent = file.name;
-    label.style.display = 'none';
-    preview.classList.remove('hidden');
-  }
-
-  document.getElementById('analyse-image-btn').addEventListener('click', async () => {
-    if (!STATE.uploadedImage) {
-      alert('Please upload an image first.');
-      return;
-    }
-    const btn = document.getElementById('analyse-image-btn');
-    setButtonLoading(btn, true);
-    await simulateDelay(2200);
-    setButtonLoading(btn, false);
-    renderImageAnalysis();
-    document.getElementById('image-analysis-results').classList.remove('hidden');
-    document.getElementById('upload-info').classList.add('hidden');
-    document.getElementById('image-analysis-results').scrollIntoView({ behavior: 'smooth' });
-  });
+function _applyImageToUI(dataUrl, fileName) {
+  document.getElementById('upload-zone').style.display    = 'none';
+  document.getElementById('upload-preview').style.display = 'flex';
+  document.getElementById('preview-img').src              = dataUrl;
+  document.getElementById('preview-filename').textContent = fileName;
+  // keep analysis results hidden until Analyze is clicked
+  document.getElementById('image-analysis-results').classList.add('hidden');
+  document.getElementById('upload-info').classList.remove('hidden');
 }
 
-function renderImageAnalysis() {
-  const file  = STATE.uploadedImage;
-  const url   = document.getElementById('preview-img').src;
-  const isSafe = !STATE.isDiabetic; // demo: safe if patient is not diabetic
+function initImageUpload() {
+  var fileInput = document.getElementById('file-input');
+  if (!fileInput) return;
 
-  // Uploaded image
-  document.getElementById('uploaded-img-display').innerHTML =
-    `<img src="${url}" alt="Uploaded product" /><p>Uploaded Image: ${file.name}</p>`;
+  // File selection is handled by inline onchange in index.html
+  // (sets STATE.uploadedImage synchronously before FileReader runs)
 
-  // Product banner (simulated product name from filename)
-  const productName = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+  // Drag-and-drop
+  var zone = document.getElementById('upload-zone');
+  zone.addEventListener('dragover',  function (e) { e.preventDefault(); zone.style.borderColor = 'var(--teal)'; });
+  zone.addEventListener('dragleave', function ()  { zone.style.borderColor = ''; });
+  zone.addEventListener('drop', function (e) {
+    e.preventDefault();
+    zone.style.borderColor = '';
+    var file = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (!file) return;
+    STATE.uploadedImage = file;
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      STATE.previewUrl = ev.target.result;
+      _applyImageToUI(ev.target.result, file.name);
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Analyse and Reset are wired via onclick in HTML (see analyzeImage / resetImageUpload globals)
+}
+
+// ── Global handlers called directly from onclick attributes in HTML ─────────
+async function analyzeImage() {
+  var btn = document.getElementById('analyse-image-btn');
+  if (!STATE.uploadedImage) { alert('Please upload an image first.'); return; }
+  setButtonLoading(btn, true);
+  try {
+    var form = new FormData();
+    form.append('image', STATE.uploadedImage);
+    form.append('healthData', STATE.dataString || '');
+    var res  = await fetch('/api/analyze', { method: 'POST', body: form });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Analysis failed.');
+    renderImageAnalysis(data);
+    document.getElementById('image-analysis-results').classList.remove('hidden');
+    document.getElementById('image-analysis-results').scrollIntoView({ behavior: 'smooth' });
+  } catch (err) {
+    alert('Error: ' + err.message);
+  } finally {
+    setButtonLoading(btn, false);
+  }
+}
+
+function resetImageUpload() {
+  var fileInput = document.getElementById('file-input');
+  STATE.uploadedImage = null;
+  STATE.previewUrl    = null;
+  if (fileInput) fileInput.value = '';
+  document.getElementById('preview-img').src              = '';
+  document.getElementById('preview-filename').textContent = '';
+  document.getElementById('upload-preview').style.display = 'none';
+  document.getElementById('upload-zone').style.display    = '';
+  var resultsEl = document.getElementById('image-analysis-results');
+  resultsEl.classList.add('hidden');
+  ['product-type-banner','nutritional-content-table','product-recommendation-box',
+   'detailed-reasons','nutrition-info-table','image-conclusion-box'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = '';
+  });
+  document.getElementById('upload-info').classList.remove('hidden');
+}
+
+function renderImageAnalysis(apiData) {
+
+  const file = STATE.uploadedImage;
+  const url  = STATE.previewUrl || document.getElementById('preview-img').src;
+
+  // Parse AI analysis text
+  const analysisText = apiData.analysis || '';
+  const composition  = apiData.composition || '';
+
+  // uploaded image display removed — analysis shows only parsed results
+
+  // Product type from composition OCR
+  const productTypeMatch = composition.match(/Product type:\s*(.+)/i);
+  const productType = productTypeMatch ? productTypeMatch[1].trim() : file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
   document.getElementById('product-type-banner').innerHTML =
-    `🍔 Product: <strong>${productName}</strong>`;
+    `🍔 Product: <strong>${productType}</strong>`;
 
-  // Nutritional content table (simulated OCR output)
-  const nutritionRows = [
-    ['Serving Size',       '100 g'],
-    ['Energy',             '250 kcal'],
-    ['Total Fat',          '10 g'],
-    ['Saturated Fat',      '4 g'],
-    ['Trans Fat',          '0 g'],
-    ['Cholesterol',        '30 mg'],
-    ['Sodium',             '480 mg'],
-    ['Total Carbohydrate', '32 g'],
-    ['Dietary Fiber',      '3 g'],
-    ['Total Sugars',       '8 g'],
-    ['Protein',            '12 g'],
-    ['Vitamin D',          '2 mcg'],
-    ['Calcium',            '260 mg'],
-    ['Iron',               '8 mg'],
-  ];
+  // Parse nutritional lines from composition OCR
+  const compLines = composition.split('\n').filter(l => /^\d+\./.test(l.trim()));
+  const nutritionRows = compLines.map(l => {
+    const parts = l.replace(/^\d+\.\s*/, '').split(':');
+    return [parts[0]?.trim() || '', parts.slice(1).join(':').trim() || ''];
+  });
+  if (nutritionRows.length === 0) {
+    nutritionRows.push(['See raw composition below', composition]);
+  }
   document.getElementById('nutritional-content-table').innerHTML =
-    buildTable(['Nutritional Content', 'Amount per 100 g'], nutritionRows);
+    buildTable(['Nutritional Content', 'Amount'], nutritionRows);
 
-  // Recommendation box
-  const recBox  = document.getElementById('product-recommendation-box');
+  // Recommendation from analysis text
+  const recMatch = analysisText.match(/Is the product recommended\?:\s*(yes|no)/i);
+  const isSafe   = recMatch ? recMatch[1].toLowerCase() === 'yes' : !STATE.isDiabetic;
+  const recBox   = document.getElementById('product-recommendation-box');
   recBox.className = `status-box ${isSafe ? 'positive' : 'negative'}`;
   recBox.innerHTML = `<span class="status-dot"></span>${isSafe ? '✅ Product is recommended' : '⚠️ Product is not recommended'}`;
 
   // Detailed reasons
-  const reasons = isSafe
-    ? [
-        'The sodium content (480 mg) is within acceptable daily limits for your health profile.',
-        'The sugar content (8 g per serving) is moderate and manageable for your glucose level.',
-        'Protein content (12 g) supports muscle maintenance and satiety.',
-        'The dietary fiber (3 g) helps moderate glycemic response.',
-      ]
-    : [
-        `Your current glucose level (${STATE.glucose} mg/dL) is elevated — high-sugar products should be avoided.`,
-        'Elevated sodium intake can worsen blood pressure in individuals with diabetes risk.',
-        'Saturated fat content (4 g) may contribute to cardiovascular complications.',
-        'Recommend seeking lower-calorie, low-sugar alternatives.',
-      ];
+  const reasonsSection = analysisText.match(/Detailed reasons:([\s\S]*?)(?=Nutrition information:|Conclusion:|$)/i);
+  const rawReasons = reasonsSection ? reasonsSection[1].trim() : '';
+  const reasons = rawReasons.split('\n').map(l => l.replace(/^-\s*/, '').trim()).filter(Boolean);
   document.getElementById('detailed-reasons').innerHTML =
-    '<ul>' + reasons.map(r => `<li>${r}</li>`).join('') + '</ul>';
+    '<ul>' + (reasons.length ? reasons : ['See full analysis below.']).map(r => `<li>${r}</li>`).join('') + '</ul>';
 
-  // Nutrition info table
-  const infoRows = [
-    ['Consumption pattern', isSafe ? 'Moderate consumption suitable as an occasional snack' : 'Limit or avoid — choose diabetic-friendly alternatives'],
-    ['Daily calories',      `250 kcal per 100 g — approximately ${Math.round(250 / STATE.daily * 100)}% of your daily target (${STATE.daily} kcal)`],
-    ['Nutrition',           `Fat: 10g | Carbs: 32g | Protein: 12g | Fiber: 3g`],
-    ['Serving suggestion',  isSafe ? 'Enjoy as part of a balanced meal; pair with vegetables to increase fiber intake.' : 'Replace with whole grain or low-sugar options; consult a dietitian.'],
-  ];
+  // Nutrition info rows
+  const infoSection = analysisText.match(/Nutrition information:([\s\S]*?)(?=Conclusion:|$)/i);
+  const rawInfo = infoSection ? infoSection[1].trim() : '';
+  const infoRows = rawInfo.split('\n').map(l => {
+    const parts = l.replace(/^-\s*/, '').split(':');
+    return [parts[0]?.trim(), parts.slice(1).join(':').trim()];
+  }).filter(r => r[0] && r[1]);
+  if (infoRows.length === 0) infoRows.push(['Analysis', analysisText]);
   document.getElementById('nutrition-info-table').innerHTML =
     buildTable(['Nutrition Info', 'Description'], infoRows);
 
   // Conclusion
+  const conclMatch = analysisText.match(/Conclusion:([\s\S]*$)/i);
+  const conclusionText = conclMatch ? conclMatch[1].trim() : (isSafe
+    ? `"${productType}" appears suitable for your health profile. Consume in moderation.`
+    : `"${productType}" is not recommended given your current health indicators.`);
   const concl = document.getElementById('image-conclusion-box');
   concl.className = `conclusion-box ${isSafe ? 'positive' : 'negative'}`;
-  concl.textContent = isSafe
-    ? `"${productName}" is generally suitable for your health profile. Consume in moderation and keep monitoring your daily nutrient intake.`
-    : `"${productName}" is not recommended given your current health indicators. Consider choosing products with lower sugar and sodium content.`;
+  concl.textContent = conclusionText;
 }
 
 // ════════════════════════════════════════════════════════════════════════════
