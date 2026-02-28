@@ -36,9 +36,7 @@ project-repo/
 │
 ├── utils/                          # Helper functions
 │   ├── __init__.py                 
-│   └── data/
-│       ├── __init__.py             
-│       └── cleaning.py             # Food dataset cleaning utilities
+│   └── data_cleaning.py            # Food dataset cleaning utilities
 │
 ├── data/                           # Local data storage (Often ignored in version control)
 │   ├── dataset/                    # CSV datasets
