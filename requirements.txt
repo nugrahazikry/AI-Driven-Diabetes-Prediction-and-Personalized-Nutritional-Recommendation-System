@@ -1,15 +1,12 @@
-google-generativeai==0.8.3
 pandas==2.2.3
 Pillow==10.0.0
+google-generativeai==0.8.3
 langchain_core==0.3.13
 langchain-openai==0.2.3
 scikit-learn==1.4.2
-plotly==5.22.0
 numpy==1.26.4
 pydantic==2.9.2
-matplotlib==3.7.2
-seaborn==0.12.2
 python-dotenv==1.0.1
-streamlit==1.32.0
+flask==3.1.0
 pyparsing==2.4.7
 httplib2==0.22.0

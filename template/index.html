@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diabetes &amp; Health Analysis</title>
+  <link rel="stylesheet" href="/static/css/styles.css?v=7" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════  HEADER  ══════════════════════════════ -->
+  <header class="app-header">
+    <a class="header-logo" href="#">HEALTH<span>KATON</span> BPJS KESEHATAN 2024 TOP 10 FINALIST PROJECT AI CATEGORY</a>
+    <p class="header-subtitle">
+      By
+      <a href="https://www.linkedin.com/in/nugrahazikry" target="_blank">Zikry Adjie Nugraha</a>,
+      <a href="https://www.linkedin.com/in/diki-rustian/" target="_blank">Diki Rustian</a> &amp;
+      <a href="https://www.linkedin.com/in/mff/" target="_blank">Muhammad Fikri Fadillah</a>
+    </p>
+  </header>
+
+  <!-- ═══════════════════════════  NAV  ════════════════════════════════ -->
+  <nav class="page-nav">
+    <button class="nav-btn active" data-page="prediction">🩺 Prediction</button>
+    <button class="nav-btn" data-page="recommendation">🍔 Food Recommendation</button>
+    <button class="nav-btn" data-page="upload">📸 Analyze Product Photo</button>
+  </nav>
+
+  <main class="container">
+
+    <!-- ═══════════════════  PAGE 1 – PREDICTION  ══════════════════════ -->
+    <section id="page-prediction" class="page active">
+
+      <div class="page-hero">
+        <h2>Predict your Diabetes &amp; Health</h2>
+        <p class="page-hero-sub">Enter your health data below to receive a personalised risk assessment and lifestyle recommendations.</p>
+      </div>
+
+      <form id="predict-form" novalidate>
+      <div class="form-card">
+        <div class="form-grid">
+          <!-- Column 1 -->
+          <div class="form-col">
+            <div class="form-group">
+              <label for="glucose">Blood Sugar Level (mg/dL)</label>
+              <div class="number-input-wrapper">
+                <button type="button" class="stepper dec" data-target="glucose">−</button>
+                <input type="number" id="glucose" name="glucose" min="0" max="200" value="100" />
+                <button type="button" class="stepper inc" data-target="glucose">+</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="bloodpressure">Diastolic Blood Pressure (mmHg)</label>
+              <div class="number-input-wrapper">
+                <button type="button" class="stepper dec" data-target="bloodpressure">−</button>
+                <input type="number" id="bloodpressure" name="bloodpressure" min="0" max="200" value="100" />
+                <button type="button" class="stepper inc" data-target="bloodpressure">+</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="age">Age</label>
+              <div class="number-input-wrapper">
+                <button type="button" class="stepper dec" data-target="age">−</button>
+                <input type="number" id="age" name="age" min="0" max="100" value="100" />
+                <button type="button" class="stepper inc" data-target="age">+</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2 -->
+          <div class="form-col">
+            <div class="form-group">
+              <label for="weight">Weight (kg)</label>
+              <div class="number-input-wrapper">
+                <button type="button" class="stepper dec" data-target="weight" data-step="0.1">−</button>
+                <input type="number" id="weight" name="weight" min="0" max="200" step="0.1" value="100.0" />
+                <button type="button" class="stepper inc" data-target="weight" data-step="0.1">+</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="height">Height (cm)</label>
+              <div class="number-input-wrapper">
+                <button type="button" class="stepper dec" data-target="height" data-step="0.1">−</button>
+                <input type="number" id="height" name="height" min="0" max="250" step="0.1" value="100.0" />
+                <button type="button" class="stepper inc" data-target="height" data-step="0.1">+</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="gender">Gender</label>
+              <select id="gender" name="gender" class="select-input-light">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity Slider -->
+        <div class="form-group activity-group">
+          <h4>Your activity plan:</h4>
+          <div class="activity-slider-labels">
+            <span>Sedentary</span>
+            <span>Light</span>
+            <span>Moderate</span>
+            <span>Active</span>
+            <span>Very Active</span>
+            <span>Intense</span>
+          </div>
+          <input type="range" id="activity" name="activity" min="0" max="5" value="0" class="activity-slider" />
+          <div class="activity-display" id="activity-display">Sedentary (No exercise)</div>
+        </div>
+
+        <div class="btn-center">
+          <button type="submit" class="btn-primary" id="predict-btn">
+            <span class="btn-text">Predict your health data</span>
+            <span class="btn-spinner hidden">⏳ Analyzing…</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- ── Results ────────────────────────────────────────────────── -->
+      <div id="prediction-results" class="hidden">
+
+        <div id="diabetes-status-box" class="status-box"></div>
+
+        <h3>Your health information:</h3>
+
+        <div class="cards-row-2">
+          <div class="metric-card" id="bmi-card"></div>
+          <div class="metric-card" id="bmr-card"></div>
+        </div>
+
+        <div class="cards-row-3">
+          <div class="metric-card" id="breakfast-cal-card"></div>
+          <div class="metric-card" id="lunch-cal-card"></div>
+          <div class="metric-card" id="dinner-cal-card"></div>
+        </div>
+
+        <div id="bmi-category-badge" class="bmi-badge"></div>
+
+        <h3>Your health details:</h3>
+        <div class="table-wrapper" id="health-details-table"></div>
+
+        <h3>Healthy lifestyle recommendations:</h3>
+        <div id="lifestyle-advice" class="advice-list"></div>
+
+        <h3>Your health conclusion:</h3>
+        <div id="conclusion-box" class="conclusion-box"></div>
+
+        <!-- Navigation -->
+        <h3>Choose page:</h3>
+        <div class="nav-buttons-row">
+          <button class="nav-page-btn" onclick="switchPage('recommendation')">🍔 Food recommendation</button>
+          <button class="nav-page-btn" onclick="switchPage('upload')">📸 Analyze product photo</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════  PAGE 2 – FOOD RECOMMENDATION  ═══════════════ -->
+    <section id="page-recommendation" class="page">
+
+      <div class="page-title-banner">
+        <h1>Food Recommendations for You</h1>
+        <p class="sub">Personalised meal suggestions based on your health profile.</p>
+      </div>
+
+      <div class="page-content-card">
+
+      <h3>Your health data:</h3>
+      <div id="rec-health-cards" class="health-cards-area"></div>
+
+      <!-- Warning shown before prediction is run -->
+      <div id="rec-prediction-warning" class="prediction-warning hidden">
+        <span class="warning-icon">⚠️</span>
+        <div>
+          <strong>Prediction required</strong>
+          <p>Please complete the <button class="warning-link" onclick="switchPage('prediction')">Prediction page</button> first to unlock your personalised food recommendations.</p>
+        </div>
+      </div>
+
+      <!-- Gated content — hidden until prediction is run -->
+      <div id="rec-gated-content" class="hidden">
+
+      <h3>Recommended food list:</h3>
+      <div id="food-grid" class="food-grid"></div>
+
+      <h3>Choose your meal:</h3>
+      <div class="meal-select-grid">
+        <div class="form-group">
+          <label>Choose your breakfast:</label>
+          <select id="sel-breakfast" class="select-input"></select>
+        </div>
+        <div class="form-group">
+          <label>Choose your lunch:</label>
+          <select id="sel-lunch" class="select-input"></select>
+        </div>
+        <div class="form-group">
+          <label>Choose your dinner:</label>
+          <select id="sel-dinner" class="select-input"></select>
+        </div>
+      </div>
+
+      <div class="btn-center">
+        <button class="btn-primary" id="check-nutrition-btn">
+          <span class="btn-text">Check nutrition information</span>
+          <span class="btn-spinner hidden">⏳ Analyzing…</span>
+        </button>
+      </div>
+
+      </div><!-- /#rec-gated-content -->
+
+      <div id="food-analysis-results" class="hidden">
+        <h3>Your meal nutrition information:</h3>
+
+        <div class="meal-expander" data-meal="breakfast">
+          <div class="expander-header" onclick="toggleExpander(this)">
+            <span>🌅 Breakfast menu</span><span class="chevron">▼</span>
+          </div>
+          <div class="expander-body">
+            <div id="breakfast-meal-title" class="meal-title"></div>
+            <div id="breakfast-meal-table" class="table-wrapper"></div>
+          </div>
+        </div>
+
+        <div class="meal-expander" data-meal="lunch">
+          <div class="expander-header" onclick="toggleExpander(this)">
+            <span>🌤️ Lunch menu</span><span class="chevron">▼</span>
+          </div>
+          <div class="expander-body">
+            <div id="lunch-meal-title" class="meal-title"></div>
+            <div id="lunch-meal-table" class="table-wrapper"></div>
+          </div>
+        </div>
+
+        <div class="meal-expander" data-meal="dinner">
+          <div class="expander-header" onclick="toggleExpander(this)">
+            <span>🌙 Dinner menu</span><span class="chevron">▼</span>
+          </div>
+          <div class="expander-body">
+            <div id="dinner-meal-title" class="meal-title"></div>
+            <div id="dinner-meal-table" class="table-wrapper"></div>
+          </div>
+        </div>
+
+        <h3>Your food selection conclusion:</h3>
+        <div id="food-conclusion-box" class="conclusion-box green"></div>
+      </div>
+
+      <h3>Choose page:</h3>
+      <div class="nav-buttons-row">
+        <button class="nav-page-btn" onclick="switchPage('prediction')">🩺 Back to health page</button>
+        <button class="nav-page-btn" onclick="switchPage('upload')">📸 Analyze product photo</button>
+      </div>
+
+      </div><!-- /.page-content-card -->
+    </section>
+
+    <!-- ══════════════════  PAGE 3 – UPLOAD FILE  ══════════════════════ -->
+    <section id="page-upload" class="page">
+
+      <div class="page-title-banner upload-banner">
+        <h1>Food Composition Photo Analysis</h1>
+        <p class="sub">Upload a product label photo for AI-powered nutritional analysis.</p>
+      </div>
+
+      <div class="page-content-card">
+
+      <h3>Your health data:</h3>
+      <div id="upload-health-cards" class="health-cards-area"></div>
+
+      <!-- Warning shown before prediction is run -->
+      <div id="upload-prediction-warning" class="prediction-warning hidden">
+        <span class="warning-icon">⚠️</span>
+        <div>
+          <strong>Prediction required</strong>
+          <p>Please complete the <button class="warning-link" onclick="switchPage('prediction')">Prediction page</button> first to unlock the food composition analysis.</p>
+        </div>
+      </div>
+
+      <!-- Gated content — hidden until prediction is run -->
+      <div id="upload-gated-content" class="hidden">
+
+      <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+        <h3 style="margin:0;">Upload Product Composition Photo</h3>
+        <button type="button" class="btn-primary" onclick="loadSampleImage()" style="padding:7px 16px; font-size:.8rem;">🖼️ Sample input</button>
+      </div>
+
+      <!-- Hidden file input — handler attached inline so it always works -->
+      <input type="file" id="file-input" accept="image/jpeg,image/png,.jpg,.jpeg,.png" style="display:none" />
+      <script>
+      document.getElementById('file-input').onchange = function() {
+        var file = this.files && this.files[0];
+        if (!file) return;
+        // Write directly into the same STATE var declared in app.js
+        STATE.uploadedImage = file;
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var d = e.target.result;
+          STATE.previewUrl = d;
+          document.getElementById('preview-img').src = d;
+          document.getElementById('preview-filename').textContent = file.name;
+          document.getElementById('upload-zone').style.display = 'none';
+          document.getElementById('upload-preview').style.display = 'flex';
+          document.getElementById('image-analysis-results').classList.add('hidden');
+          document.getElementById('upload-info').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      };
+      </script>
+
+      <!-- Clickable upload area — label natively opens file picker in all browsers -->
+      <label for="file-input" id="upload-zone">
+        <span class="upload-icon">📁</span>
+        <span class="upload-label-text">CLICK TO CHOOSE AN IMAGE OR DRAG &amp; DROP HERE</span>
+        <span class="upload-label-sub">SUPPORTS: JPG, JPEG, PNG</span>
+      </label>
+
+      <!-- Debug area (temporary) - placed directly under upload zone -->
+
+      <!-- Preview shown after file is chosen -->
+      <div id="upload-preview" style="display:none; flex-direction:column; align-items:center; gap:12px; padding:24px; border:2px solid var(--border); border-radius:var(--radius-lg); background:var(--surface); margin-top:12px; position:relative;">
+        <button id="reset-upload-btn" type="button" class="btn-reset-corner" onclick="resetImageUpload()">Reset image</button>
+        <img id="preview-img" src="" alt="Preview" style="max-height:340px; max-width:100%; border-radius:10px; box-shadow:0 4px 16px rgba(0,0,0,.14); object-fit:contain;" />
+        <p id="preview-filename" style="font-size:.85rem; color:var(--muted); margin:0; font-style:italic;"></p>
+      </div>
+
+      <!-- Debug area (temporary) -->
+      <div id="upload-debug" style="display:none;margin-top:8px;color:#b33;font-size:.95rem;"></div>
+
+      <div class="btn-center" style="margin-top:20px;">
+        <button class="btn-primary" id="analyse-image-btn" onclick="analyzeImage()">
+          <span class="btn-text">Analyze product image</span>
+          <span class="btn-spinner hidden">⏳ Processing…</span>
+        </button>
+      </div>
+
+      <!-- Note about backend -->
+      <div class="info-box" id="upload-info">
+        ℹ️ Upload an image to analyze nutritional composition. (AI/OCR backend required for live analysis — results below are demonstrative.)
+      </div>
+
+      </div><!-- /#upload-gated-content -->
+
+      <!-- Global debug (hidden in production) -->
+      <div style="display:none;gap:8px;align-items:center;margin-top:8px;">
+        <div id="upload-debug-global" style="display:none;color:#b33;font-size:.95rem;"></div>
+      </div>
+
+      <div id="image-analysis-results" class="hidden">
+
+        <div id="product-type-banner" class="product-banner"></div>
+
+        <h3>Nutritional Content:</h3>
+        <div id="nutritional-content-table" class="table-wrapper"></div>
+
+        <h3>Is the product recommended?</h3>
+        <div id="product-recommendation-box" class="status-box"></div>
+
+        <h3>Detailed reasons:</h3>
+        <div id="detailed-reasons" class="advice-list"></div>
+
+        <h3>Nutrition information:</h3>
+        <div id="nutrition-info-table" class="table-wrapper"></div>
+
+        <h3>Product information conclusion:</h3>
+        <div id="image-conclusion-box" class="conclusion-box"></div>
+      </div>
+
+      <h3>Choose page:</h3>
+      <div class="nav-buttons-row">
+        <button class="nav-page-btn" onclick="switchPage('prediction')">🩺 Back to health page</button>
+        <button class="nav-page-btn" onclick="switchPage('recommendation')">🍔 Food recommendation</button>
+      </div>
+
+      </div><!-- /.page-content-card -->
+    </section>
+
+  </main>
+
+  <footer class="app-footer">
+    <p>&copy; 2024 <strong>Healthkaton</strong> — Team Keprof Reborn &nbsp;·&nbsp;
+      <a href="https://www.linkedin.com/in/nugrahazikry" target="_blank">Zikry</a>,
+      <a href="https://www.linkedin.com/in/diki-rustian/" target="_blank">Diki</a>,
+      <a href="https://www.linkedin.com/in/mff/" target="_blank">Fikri</a>
+    </p>
+  </footer>
+
+  <script src="/static/js/app.js?v=18"></script>
+  <!-- Debug banner removed -->
+</body>
+</html>
