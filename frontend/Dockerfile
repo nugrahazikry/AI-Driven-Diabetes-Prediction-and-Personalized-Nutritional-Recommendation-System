@@ -1,12 +1,19 @@
 # ── Healthkaton — Frontend (nginx) ────────────────────────────────────────────
-FROM nginx:alpine
+# Build context: final/ (project root)
+# Run:  docker build -f frontend/Dockerfile -t healthkaton-frontend .
+# ─────────────────────────────────────────────────────────────────────────────
+FROM nginx:stable-alpine
 
-# Replace default nginx config with our custom one
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Remove default Nginx config
+RUN rm /etc/nginx/conf.d/default.conf
 
-# Copy all public assets (index.html, static/css, static/js)
-COPY public/ /usr/share/nginx/html/
+# Serve static assets at /static/ inside the container
+COPY frontend/public/static/ /usr/share/nginx/html/static/
+
+# Serve main HTML entry point
+COPY frontend/public/index.html /usr/share/nginx/html/index.html
+
+# Custom Nginx config (proxies everything else to backend)
+COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]

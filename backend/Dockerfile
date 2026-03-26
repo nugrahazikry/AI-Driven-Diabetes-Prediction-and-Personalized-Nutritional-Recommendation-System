@@ -11,7 +11,7 @@ WORKDIR /app
 
 # Install Python dependencies first (layer-cached)
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt gunicorn
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application source
 COPY . .

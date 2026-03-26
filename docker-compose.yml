@@ -19,6 +19,7 @@ services:
     build:
       context:    ./backend
       dockerfile: Dockerfile
+    image: ai-diabetes-healtkathon-2024_v1-backend
     container_name: healthkaton-backend
     restart: unless-stopped
     env_file: ./backend/.env          # GEN_AI_API_KEY etc.
@@ -40,8 +41,9 @@ services:
   # ── Frontend — nginx ───────────────────────────────────────────────────────
   frontend:
     build:
-      context:    ./frontend
-      dockerfile: Dockerfile
+      context:    .
+      dockerfile: frontend/Dockerfile
+    image: ai-diabetes-healtkathon-2024_v1-frontend
     container_name: healthkaton-frontend
     restart: unless-stopped
     ports:

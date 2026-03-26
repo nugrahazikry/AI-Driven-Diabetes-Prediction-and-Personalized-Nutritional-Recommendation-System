@@ -1,6 +1,4 @@
 from dotenv import load_dotenv
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
 import google.generativeai as genai
 import os
 from pathlib import Path
@@ -25,9 +23,7 @@ genai.configure(api_key=GEN_AI_API_KEY)
 
 # Model fallback list (in priority order)
 _MODEL_FALLBACK_LIST = [
-    'gemini-2.5-flash-lite',
-    'gemini-2.5-flash',
-    'gemini-2.0-flash',
+    'gemini-2.5-flash-lite'
 ]
 
 
