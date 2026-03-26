@@ -59,15 +59,31 @@ On the first page, fill in the form with your current health metrics:
 - Weight (kg) and Height (cm)
 - Age, Gender, and daily Activity level
 
+<p align="center"><img src="images/diabetes_vis_1.png" alt="diabetes_vis_1"></p>
+
 Click **Predict your health data**. The system will display your diabetes status, BMI category, daily calorie targets, AI-generated health insights, and personalised lifestyle advice.
+
+<p align="center"><img src="images/diabetes_vis_2.png" alt="diabetes_vis_2"></p>
 
 ### Step 2 — Explore Food Recommendations (Food Recommendation Page)
 
-Navigate to the **Food Recommendations for You** page. Based on your prediction results, the system suggests breakfast, lunch, and dinner options from a traditional Indonesian food dataset. Each suggestion respects your calorie budget for that meal.
+Navigate to the **Food Recommendations for You** page. Based on your prediction results, the system suggests breakfast, lunch, and dinner options from a traditional Indonesian food dataset. 
+
+<p align="center"><img src="images/diabetes_vis_3.png" alt="diabetes_vis_3"></p>
+
+Each suggestion respects your calorie budget for that meal.
+
+<p align="center"><img src="images/diabetes_vis_4.png" alt="diabetes_vis_4"></p>
 
 ### Step 3 — Analyse a Food Label (Image Analysis Page)
 
-Go to the **Food Composition Photo Analysis** page. Upload a photo of a food product's nutritional label (or click **Sample input** to use the provided example). Click **Analyze product image** to receive an AI-generated verdict on whether the product is recommended for your health profile.
+Go to the **Food Composition Photo Analysis** page. Upload a photo of a food product's nutritional label (or click **Sample input** to use the provided example). 
+
+<p align="center"><img src="images/diabetes_vis_5.png" alt="diabetes_vis_5"></p>
+
+Click **Analyze product image** to receive an AI-generated verdict on whether the product is recommended for your health profile.
+
+<p align="center"><img src="images/diabetes_vis_6.png" alt="diabetes_vis_6"></p>
 
 
 # For Developers
