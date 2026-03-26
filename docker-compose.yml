@@ -1,0 +1,59 @@
+# ══════════════════════════════════════════════════════════════════════════════
+#  Healthkaton — Docker Compose
+#
+#  Services:
+#    backend   – Flask REST API  (internal port 5000, not exposed to host)
+#    frontend  – nginx static server + API proxy  (host port 80)
+#
+#  Usage:
+#    docker compose up --build          # first run / after code changes
+#    docker compose up -d               # detached
+#    docker compose down                # stop & remove containers
+#    docker compose logs -f backend     # tail backend logs
+# ══════════════════════════════════════════════════════════════════════════════
+
+services:
+
+  # ── Backend — Flask API ────────────────────────────────────────────────────
+  backend:
+    build:
+      context:    ./backend
+      dockerfile: Dockerfile
+    image: ai-diabetes-healtkathon-2024_v1-backend
+    container_name: healthkaton-backend
+    restart: unless-stopped
+    env_file: ./backend/.env          # GEN_AI_API_KEY etc.
+    expose:
+      - "5000"                        # visible only inside Docker network
+    volumes:
+      # Mount data & model as read-only so changes on host are reflected
+      - ./backend/data:/app/data:ro
+      - ./backend/model:/app/model:ro
+    networks:
+      - healthkaton-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout:  10s
+      retries:  5
+      start_period: 40s
+
+  # ── Frontend — nginx ───────────────────────────────────────────────────────
+  frontend:
+    build:
+      context:    .
+      dockerfile: frontend/Dockerfile
+    image: ai-diabetes-healtkathon-2024_v1-frontend
+    container_name: healthkaton-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"                       # app reachable at http://localhost
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - healthkaton-net
+
+networks:
+  healthkaton-net:
+    name: healthkaton-network

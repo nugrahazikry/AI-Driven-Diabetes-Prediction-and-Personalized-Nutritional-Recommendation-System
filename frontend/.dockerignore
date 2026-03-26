@@ -1,0 +1,4 @@
+# No build context needed for nginx — just config + static files
+.git/
+.gitignore
+README.md

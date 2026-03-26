@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.env
+*.egg-info/
+dist/
+build/
+.git/
+.gitignore
+notebooks/
+*.ipynb
+.devcontainer/
+Dockerfile
+README.md

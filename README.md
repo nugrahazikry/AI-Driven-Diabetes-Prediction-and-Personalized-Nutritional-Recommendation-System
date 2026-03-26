@@ -1,106 +1,300 @@
 ﻿# AI Driven Diabetes Prediction and Personalized Nutritional Recommendation System
 This project integrates machine learning and AI to support personalized diabetes management and health improvement through data-driven insights and food recommendations. By predicting diabetes status from patient health data, the system offers tailored health advice. Using these predictions, it suggests traditional Indonesian foods appropriate for various stages of diabetes and provides health insights based on selected foods. Additionally, a computer vision component with OCR detects nutritional information from food labels, allowing AI to offer real-time health guidance based on nutritional content. Together, these components provide a comprehensive, personalized approach to diabetes care and dietary management.
 
-# Application Demo
-You can try the application yourself here:
+![Python Version](https://img.shields.io/badge/python-3.11-blue)
+![Docker](https://img.shields.io/badge/docker-supported-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 
-https://ai-driven-diabetes-prediction-and-personalized-nutrition-insig.streamlit.app/
+# Table of content
 
-# Project Structure
+- [For Users](#for-users)
+  - [Application Demo](#application-demo)
+  - [Apps Features](#apps-features)
+  - [How to Use the Apps](#how-to-use-the-apps)
+- [For Developers](#for-developers)
+  - [Project Structure](#project-structure)
+  - [Getting Started](#getting-started)
+  - [Code Explanation](#code-explanation)
+  - [Run the project with Docker (Local)](#run-the-project-with-docker-local)
+  - [Deploy to Google Cloud Run](#deploy-to-google-cloud-run)
+  - [Contributors](#contributors)
+  - [License](#license)
+
+
+# For Users
+
+## Application Demo
+
+You can try the deployed application here:
+
+https://ai-diabetes-healthkaton-2024-v1-118493320623.asia-southeast2.run.app
+
+
+## Apps Features
+
+The application consists of 3 main features.
+
+### 1. Diabetes Prediction
+
+Enter your health metrics — glucose level, diastolic blood pressure, weight, height, age, gender, and daily activity level — to receive an ML-powered diabetes status prediction. The system calculates your BMI and daily calorie targets (BMR) and then queries Google Gemini to generate a personalised health data summary, lifestyle guidelines, and a clinical conclusion.
+
+### 2. Personalised Food Recommendation
+
+Based on your diabetes prediction results and daily calorie needs, the system recommends traditional Indonesian meals for breakfast, lunch, and dinner using a K-Nearest Neighbours (KNN) model. Calorie budgets are split 35 / 40 / 25 % across the three meals so that each suggestion fits your health profile.
+
+### 3. Food Label Image Analysis (Computer Vision)
+
+Upload a photo of any food product's nutritional label. The system uses Google Gemini's multimodal OCR capability to extract the nutritional composition, then cross-references it against your personal health data to determine whether the product is safe for a person with your diabetes profile.
+
+
+## How to use the Apps
+
+### Step 1 — Enter Your Health Data (Diabetes Prediction Page)
+
+On the first page, fill in the form with your current health metrics:
+
+- Glucose level (mg/dL)
+- Diastolic blood pressure (mmHg)
+- Weight (kg) and Height (cm)
+- Age, Gender, and daily Activity level
+
+Click **Predict your health data**. The system will display your diabetes status, BMI category, daily calorie targets, AI-generated health insights, and personalised lifestyle advice.
+
+### Step 2 — Explore Food Recommendations (Food Recommendation Page)
+
+Navigate to the **Food Recommendations for You** page. Based on your prediction results, the system suggests breakfast, lunch, and dinner options from a traditional Indonesian food dataset. Each suggestion respects your calorie budget for that meal.
+
+### Step 3 — Analyse a Food Label (Image Analysis Page)
+
+Go to the **Food Composition Photo Analysis** page. Upload a photo of a food product's nutritional label (or click **Sample input** to use the provided example). Click **Analyze product image** to receive an AI-generated verdict on whether the product is recommended for your health profile.
+
+
+# For Developers
+
+## Project Structure
+
 ```
-project-repo/
-├── app.py                          # Flask web server & REST API endpoints
-├── requirements.txt                # Python dependencies
-├── .env                            # API keys and environment variables (not committed)
-├── .gitignore                      # Files and folders to ignore in Git (e.g., .env, __pycache__/)
-├── README.md                       # Project overview and setup instructions
-│
-├── templates/                      # (Renamed from 'template') Main HTML frontend
-│   └── index.html                  
-│
-├── static/                         # Static assets (Served directly to the client)
-│   ├── css/
-│   │   └── styles.css              # Stylesheet
-│   └── js/
-│       └── app.js                  # Frontend JavaScript
-│
-├── configuration/                  # App configurations
-│   ├── __init__.py                 
-│   └── constants.py                # App-wide constants & ML model loader
-│
-├── pipelines/                      # Core business logic and ML integration
-│   ├── __init__.py                 
-│   ├── diabetes_prediction.py      # BMI/BMR calculation & AI health advice
-│   ├── food_recommendation.py      # Food recommendation logic & AI insights
-│   └── image_analysis.py           # OCR + AI nutritional analysis
-│
-├── utils/                          # Helper functions
-│   ├── __init__.py                 
-│   └── data_cleaning.py            # Food dataset cleaning utilities
-│
-├── data/                           # Local data storage (Often ignored in version control)
-│   ├── dataset/                    # CSV datasets
-│   └── analysis_input/             # Sample food label images
-│
-├── model/                          # Trained ML model files (.pkl, .h5, etc.)
-│
-└── notebooks/                      # Exploratory Data Analysis & training notebooks
-    └── exploratory_analysis.ipynb
+final/
+├── backend/
+│   ├── app.py                              # Flask REST API entry point
+│   ├── Dockerfile                          # Backend container build config
+│   ├── requirements.txt                    # Python dependencies
+│   ├── configuration/
+│   │   └── constants.py                    # Gemini client & ML model loader
+│   ├── data/
+│   │   ├── analysis_input/                 # Sample food label images
+│   │   └── dataset/
+│   │       ├── diabetes.csv                # Diabetes training dataset
+│   │       └── food_calories_dataset.csv   # Indonesian food & nutrition dataset
+│   ├── model/                              # Trained ML model file (.pkl)
+│   ├── notebooks/
+│   │   └── ml_model_diabetes_prediction.ipynb  # Model training notebook
+│   ├── pipelines/
+│   │   ├── diabetes_prediction.py          # BMI/BMR calculation & AI advice
+│   │   ├── food_recommendation.py          # KNN-based food recommendation
+│   │   └── image_analysis.py              # OCR + Gemini image analysis
+│   └── utils/
+│       └── data_cleaning.py               # Food dataset cleaning utilities
+├── frontend/
+│   ├── Dockerfile                          # Frontend container (nginx)
+│   ├── nginx.conf                          # Reverse-proxy & static-file config
+│   └── public/
+│       ├── index.html                      # Main HTML page
+│       └── static/
+│           ├── css/styles.css              # Application styles
+│           └── js/app.js                   # Client-side logic
+├── docker-compose.yml                      # Local multi-container setup
+├── cloud-run-deploy.yaml                   # Google Cloud Run deployment spec
+├── Makefile                                # Convenience make targets
+└── README.md
 ```
 
-# Description
-## 1. **Diabetes Prediction**
-Apply machine learning to predict a patient's diabetes status based on their health data (glucose level, blood pressure, BMI, age, gender, and activity level) and use AI to generate tailored health insights and recommendations accordingly.
+## Getting started
 
-## 2. **Food Recommendation**
-Use machine learning to provide food recommendations based on diabetes prediction results and health data, focusing on traditional Indonesian foods suitable for individuals at various stages of diabetes. Additionally, use AI to generate health insights based on the selected foods.
+### Dependencies and Prerequisites
 
-## 3. **Computer Vision AI Food Recommendation**
-Utilize computer vision with OCR technology to detect nutritional information from food labels, enabling AI to generate health insights and personalized advice based on the nutritional composition of the food.
+| Dependency | Version | Purpose |
+|---|---|---|
+| Python | 3.11 | Runtime |
+| Flask | 3.1.0 | REST API framework |
+| Gunicorn | 22.0.0 | WSGI production server |
+| scikit-learn | 1.4.2 | Diabetes prediction model & KNN food recommendation |
+| pandas | 2.2.3 | Data loading and manipulation |
+| numpy | 1.26.4 | Numerical operations |
+| Pillow | 10.0.0 | Image processing for food label uploads |
+| google-generativeai | 0.8.3 | Google Gemini AI (health advice & OCR analysis) |
+| python-dotenv | 1.0.1 | Environment variable management |
+| Docker | latest | Container build and orchestration |
+| nginx | stable-alpine | Static file serving and API reverse proxy |
 
-# Getting Started
-## Dependencies
-To set up the project environment, make sure all necessary libraries and dependencies are installed. Use the following command to install everything from the `requirements.txt` file:
+### Tech stack
+
+| Layer | Tech Stack |
+|---|---|
+| Backend API | Python 3.11, Flask 3.1.0, Gunicorn |
+| Machine Learning | scikit-learn (pre-trained diabetes classifier + KNN food recommender) |
+| AI / LLM | Google Gemini 2.5 Flash Lite (via `google-generativeai`) |
+| Computer Vision | Google Gemini multimodal OCR |
+| Frontend | HTML5, CSS3, Vanilla JavaScript |
+| Web Server | nginx (stable-alpine) |
+| Containerisation | Docker, Docker Compose |
+| Cloud Deployment | Google Cloud Run (asia-southeast2) |
+| Secret Management | Google Cloud Secret Manager |
+
+### Credentials setup
+
+This project requires a Google Gemini API key. Follow these steps:
+
+1. Copy the example environment file:
+```bash
+cp backend/.env.example backend/.env
+```
+
+2. Open `backend/.env` and fill in your actual values:
+```bash
+nano backend/.env  # or use any text editor
+```
+
+3. Below is the full list of required variables:
+
+| Variable | Description | Required |
+|---|---|---|
+| `GEN_AI_API_KEY` | Google Gemini API key — obtain from [Google AI Studio](https://aistudio.google.com/) | ✅ Yes |
+
+> ⚠️ **Never commit your `.env` file.** Make sure `.env` is listed in your `.gitignore`.
+
+**Example `.env.example` file:**
+```env
+# .env.example — copy this to .env and fill in your values
+GEN_AI_API_KEY=your_gemini_api_key_here
+```
+
+
+## Code explanation
+
+### Key Backend files
+
+| Category | File | Description |
+|---|---|---|
+| API Entry Point | `app.py` | Flask application with four REST endpoints: `/api/health`, `/api/predict`, `/api/recommend`, and `/api/analyze`. Loads the ML model and food dataset once at startup. |
+| Configuration | `configuration/constants.py` | Loads `GEN_AI_API_KEY`, initialises the Gemini client, and loads the pre-trained diabetes ML model from the `model/` directory. Implements a model fallback list for quota resilience. |
+| Diabetes Pipeline | `pipelines/diabetes_prediction.py` | Calculates BMI, BMR (Harris-Benedict formula), and daily calorie needs by activity level. Builds a structured health-data string and calls Gemini to generate health summaries, lifestyle guidelines, and a conclusion. |
+| Food Recommendation | `pipelines/food_recommendation.py` | Scales the nutritional dataset with `StandardScaler`, fits a cosine-distance `NearestNeighbors` model, and filters Indonesian foods by meal-specific calorie budgets (35 % breakfast, 40 % lunch, 25 % dinner) before returning the top matches. |
+| Image Analysis | `pipelines/image_analysis.py` | Accepts an uploaded image, writes it to a temporary file, submits it to Gemini's multimodal endpoint for OCR nutritional extraction, then calls Gemini again to cross-reference the extracted data against the patient's health profile. |
+| Data Utilities | `utils/data_cleaning.py` | Reads the food CSV (semicolon-delimited), trims column names, normalises unit formats (mg → g), and returns a cleaned DataFrame ready for the recommendation pipeline. |
+
+### Key Frontend files
+
+| Category | File | Description |
+|---|---|---|
+| HTML Page | `public/index.html` | Single-page application shell containing all three feature sections (Prediction, Food Recommendation, Image Analysis). |
+| Client Logic | `public/static/js/app.js` | Manages application state, form interactions, API calls (`/api/predict`, `/api/recommend`, `/api/analyze`), and dynamic DOM rendering for all three features. |
+| Styles | `public/static/css/styles.css` | Application-wide stylesheet. |
+| Reverse Proxy | `nginx.conf` | Serves static assets from `/static/`, proxies all `/api/*` requests to the Flask backend, and falls back to `index.html` for client-side routing. |
+
+
+## Run the project with Docker (Local)
+
+**Prerequisites:** Docker Desktop installed and running.
+
+1. Clone the repository and navigate to the project root:
+```bash
+git clone <repository-url>
+cd final
+```
+
+2. Create the backend environment file and add your Gemini API key:
+```bash
+cp backend/.env.example backend/.env
+# Then open backend/.env and set GEN_AI_API_KEY
+```
+
+3. Build and start both services:
+```bash
+docker compose up --build
+# OR using make:
+make up
+```
+
+4. Open your browser and navigate to:
+```
+http://localhost
+```
+
+Additional useful commands:
+
+ Command | Description |
+|---|---|
+| `make build` | Build (or rebuild) images |
+| `make up` | Build and start all containers |
+| `make start` | Start already-built containers |
+| `make stop` | Stop containers |
+| `make down` | Stop and remove containers |
+| `make clean` | Full teardown (containers, images, volumes) |
+| `make logs` | Tail live logs |
+
+
+## Deploy to Google Cloud Run
+
+**Prerequisites:** Google Cloud SDK (`gcloud`) installed and running Docker Desktop.
+
+### One-Time Setup
+
+**1. Authenticate Docker with Artifact Registry:**
 
 ```bash
-pip install -r requirements.txt
+gcloud auth configure-docker asia-southeast2-docker.pkg.dev
 ```
 
-# API Keys Setup
-To use the AI functionalities in the project, create a `.env` file in the project's root directory. This file should store your API keys in the following format:
-```
-OPENAI_API_KEY=your_openai_api_key
-GEMINI_AI_API_KEY=your_gemini_ai_api_key
-```
-Replace `your_openai_api_key` and `your_gemini_ai_api_key` with your actual OpenAI and Gemini API keys. Having this `.env` file is essential, as it allows secure access to the AI services within the project.
+**2. Allow public access (run once after first deploy):**
 
-# Executing the Program
-Once dependencies and API keys are set up, follow these steps to run and interact with the project:
+```powershell
+gcloud run services add-iam-policy-binding news-monitoring-prod-v1 `
+  --region asia-southeast2 `
+  --member="allUsers" `
+  --role="roles/run.invoker"
+```
 
-## 1. **Launch the Application**
-Run the Flask web server by executing:
+### Deploy / Redeploy Steps
+
+1. **Authenticate and set your project:**
 ```bash
-python app.py
-```
-Then open your browser and navigate to:
-```
-http://localhost:5000
+gcloud auth login
+gcloud config set project <your-project-id>
 ```
 
-## 2. **Access the Prediction Page**
-On the first page, input your health data  including glucose levels, blood pressure, weight, height, age, gender, and activity level  for diabetes assessment.
+2. **Enable Artifact Registry:**
+```bash
+gcloud services enable artifactregistry.googleapis.com
+```
 
-## 3. **Generate a Diabetes Prediction and AI Health Insights**
-After entering the health data, click the **Predict your health data** button. This will provide a diabetes prediction along with AI-generated health insights, including BMI, daily calorie targets, lifestyle advice, and a health conclusion.
+3. **Tag both images for Artifact Registry:**
+```bash
+docker tag ai-diabetes-healtkathon-2024_v1-frontend:latest <region>-docker.pkg.dev/<your-project-id>/<your-repository>/ai-diabetes-healtkathon-2024_v1-frontend:latest
+docker tag ai-diabetes-healtkathon-2024_v1-backend:latest <region>-docker.pkg.dev/<your-project-id>/<your-repository>/ai-diabetes-healtkathon-2024_v1-backend:latest
+```
 
-## 4. **Navigate to the Food Recommendation Page**
-Move to the **Food Recommendations for You** page. Personalised meal options for breakfast, lunch, and dinner are listed based on your health profile. Select your preferred items from the dropdowns and click **Check nutrition information** to view AI-generated nutritional insights per meal.
+4. **Push both images to Artifact Registry:**
+```bash
+docker push <region>-docker.pkg.dev/<your-project-id>/<your-repository>/ai-diabetes-healtkathon-2024_v1-frontend:latest
+docker push <region>-docker.pkg.dev/<your-project-id>/<your-repository>/ai-diabetes-healtkathon-2024_v1-backend:latest
+```
 
-## 5. **Navigate to the Food Composition Photo Analysis Page**
-Go to the **Food Composition Photo Analysis** page. You can either upload your own product label image or click **Sample input** to load a pre-provided sample. Click **Analyze product image** to receive OCR-based nutritional analysis and AI health guidance tailored to your health profile.
+5. **Deploy the multi-container service:**
+```bash
+gcloud run services replace cloud-run-deploy.yaml --region <region>
+```
 
-# Contributors
+> Replace `<your-project-id>`, `<your-repository>`, `<region>`, and `<your-service-name>` with your actual values. The service URL will be provided by Cloud Run after deployment.
+
+
+## Contributors
 Contributors names and contact info:
 1. **[Zikry Adjie Nugraha](https://github.com/nugrahazikry)**: Developed the Flask web interface, implemented the Computer Vision AI Food Recommendation feature, and integrated all features with AI to gather health insights.
 2. **[Diki Rustian](https://github.com/dikirust)**: Built the Diabetes Prediction feature using machine learning.
 3. **[Muhammad Fikri Fadillah](https://github.com/boxside)**: Created the personalized food with Indonesian local cuisine recommendation feature.
+
+## License
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.

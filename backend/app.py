@@ -1,15 +1,14 @@
 """
-app.py — Flask web server for Healthkaton.
+app.py — Healthkaton Flask REST API backend.
 
-Serves the HTML frontend from template/index.html and static assets from
-static/css/ and static/js/. Exposes REST API endpoints for ML prediction,
-food recommendation, and image analysis.
+Exposes only /api/* endpoints. Static files and the HTML frontend
+are served separately by the nginx container.
 
-Run with:  python app.py
+Run locally :  python app.py
+Run via Docker:  gunicorn --bind 0.0.0.0:5000 app:app
 """
 
 import sys
-import io
 import math
 from pathlib import Path
 
@@ -17,7 +16,7 @@ ROOT_DIR = Path(__file__).resolve().parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, send_from_directory
 import numpy as np
 import pandas as pd
 
@@ -33,17 +32,19 @@ from pipelines.food_recommendation import generate_nutrisi
 from pipelines.image_analysis import image_ocr_nutrition, image_analysis_composition
 
 # ── Load heavy resources once at startup ────────────────────────────────────
-_ml_model   = constants.model
-_food_data  = data_cleaning_food_dataset("data/dataset/food_calories_dataset.csv")
+_ml_model  = constants.model
+_food_data = data_cleaning_food_dataset(
+    str(ROOT_DIR / "data" / "dataset" / "food_calories_dataset.csv")
+)
 
-# ── Flask app ────────────────────────────────────────────────────────────────
-app = Flask(__name__, static_folder="static", static_url_path="/static", template_folder="template")
+# ── Flask app (API only — no static / template serving) ─────────────────────
+app = Flask(__name__)
 
 
-# ── Static / index ───────────────────────────────────────────────────────────
-@app.route("/")
-def index():
-    return render_template("index.html")
+# ── Health check ─────────────────────────────────────────────────────────────
+@app.route("/api/health")
+def api_health():
+    return jsonify({"status": "ok"})
 
 
 # ── API: Diabetes Prediction ─────────────────────────────────────────────────
@@ -55,7 +56,7 @@ def api_predict():
     blood_pressure = float(body.get("bloodPressure", 0))
     age            = float(body.get("age", 0))
     weight         = float(body.get("weight", 0))
-    height_cm      = float(body.get("height", 0))          # cm
+    height_cm      = float(body.get("height", 0))
     gender         = body.get("gender", "Male")
     activity       = body.get("activity", "Sedentary (No exercise)")
 
@@ -64,27 +65,23 @@ def api_predict():
 
     height_m = height_cm / 100.0
 
-    # BMI
     bmi_string, bmi_category, bmi_color = bmi_calculator(weight, height_m)
     bmi_val = round(weight / (height_m ** 2), 2)
 
-    # BMR / Daily calories
     bmr_raw = calculate_bmr(weight, height_m, age, gender)
     daily   = int(calculate_daily_calories(bmr_raw, activity))
     bmr1    = int(0.35 * daily)
     bmr2    = int(0.40 * daily)
     bmr3    = int(0.25 * daily)
 
-    # ML prediction
     feature_df = pd.DataFrame(
         [[glucose, blood_pressure, bmi_val, age]],
         columns=["Glucose", "BloodPressure", "BMI", "Age"],
     )
-    prediction = int(_ml_model.predict(feature_df)[0])
+    prediction  = int(_ml_model.predict(feature_df)[0])
     is_diabetic = prediction == 1
-    kondisi = "Patient has diabetes" if is_diabetic else "Patient does not have diabetes"
+    kondisi     = "Patient has diabetes" if is_diabetic else "Patient does not have diabetes"
 
-    # Health-data string for AI prompts
     data_kesehatan = (
         f"glucose level: {glucose} mg/dL\n"
         f"diastolic blood pressure: {blood_pressure} mmHg\n"
@@ -96,76 +93,64 @@ def api_predict():
         f"diabetes status: {kondisi}\n"
     )
 
-    # AI advice
     ai_result = diabetes_advice_prompt_process(data_kesehatan)
     health_rows, advice_lines, conclusion = _parse_prediction_advice(ai_result, {
         "glucose": glucose, "blood_pressure": blood_pressure,
         "bmi_val": bmi_val, "daily": daily, "age": age,
-        "gender": gender, "activity": activity, "is_diabetic": is_diabetic,
-        "bmi_category": bmi_category,
+        "gender": gender, "activity": activity,
+        "is_diabetic": is_diabetic, "bmi_category": bmi_category,
     })
 
     return jsonify({
-        "isDiabetic":    is_diabetic,
-        "bmi":           bmi_val,
-        "bmiString":     bmi_string,
-        "bmiCategory":   bmi_category,
-        "bmiColor":      bmi_color,
-        "daily":         daily,
-        "bmr1":          bmr1,
-        "bmr2":          bmr2,
-        "bmr3":          bmr3,
-        "glucose":       glucose,
-        "healthRows":    health_rows,
-        "adviceLines":   advice_lines,
-        "conclusion":    conclusion,
-        "dataString":    data_kesehatan,
+        "isDiabetic":  is_diabetic,
+        "bmi":         bmi_val,
+        "bmiString":   bmi_string,
+        "bmiCategory": bmi_category,
+        "bmiColor":    bmi_color,
+        "daily":       daily,
+        "bmr1":        bmr1,
+        "bmr2":        bmr2,
+        "bmr3":        bmr3,
+        "glucose":     glucose,
+        "healthRows":  health_rows,
+        "adviceLines": advice_lines,
+        "conclusion":  conclusion,
+        "dataString":  data_kesehatan,
     })
 
 
 def _parse_prediction_advice(ai_result, fallback):
-    """Parse AI advice text into (health_rows, advice_lines, conclusion).
-
-    Falls back to locally-generated values if the AI call failed.
-    """
-    response_text = None
-    if isinstance(ai_result, tuple):
-        response_text = ai_result[0]
-    else:
-        response_text = ai_result
+    """Parse AI advice text into (health_rows, advice_lines, conclusion)."""
+    response_text = ai_result[0] if isinstance(ai_result, tuple) else ai_result
 
     if response_text:
         try:
             sections = response_text.split("\n\n")
-            # Health info rows
             health_section = sections[0].split("Health data information:")[1]
-            health_items = [l.strip().lstrip("- ") for l in health_section.split("\n") if l.strip() and l.strip() != "-"]
-            health_rows = [item.split(": ", 1) for item in health_items if ": " in item]
+            health_items   = [l.strip().lstrip("- ") for l in health_section.split("\n") if l.strip() and l.strip() != "-"]
+            health_rows    = [item.split(": ", 1) for item in health_items if ": " in item]
 
-            # Advice lines
             advice_section = sections[1].split("Healthy lifestyle guidelines:")[1]
-            advice_lines = [l.strip().lstrip("- ") for l in advice_section.split("\n") if l.strip() and l.strip() != "-"]
+            advice_lines   = [l.strip().lstrip("- ") for l in advice_section.split("\n") if l.strip() and l.strip() != "-"]
 
-            # Conclusion
-            concl_section = sections[2].split("Conclusion:")[1]
-            conclusion = concl_section.strip()
-
+            concl_section  = sections[2].split("Conclusion:")[1]
+            conclusion     = concl_section.strip()
             return health_rows, advice_lines, conclusion
         except Exception:
-            pass  # fall through to local generation
+            pass
 
-    # ── Local fallback ────────────────────────────────────────────────────────
-    g = fallback
+    g      = fallback
     status = "has diabetes risk" if g["is_diabetic"] else "does not have diabetes risk"
+
     glucose_note = ("elevated — indicates potential insulin resistance" if g["glucose"] > 140
-                    else "borderline — requires monitoring" if g["glucose"] > 100
+                    else "borderline — requires monitoring"              if g["glucose"] > 100
                     else "within normal range")
-    bp_note = ("elevated — increases cardiovascular risk" if g["blood_pressure"] > 90
-               else "borderline high" if g["blood_pressure"] > 80
-               else "within normal diastolic range")
-    bmi_note = (f"{g['bmi_category']} — significantly increases diabetes risk" if g["bmi_val"] >= 30
-                else f"{g['bmi_category']} — moderately increases diabetes risk" if g["bmi_val"] >= 25
-                else f"{g['bmi_category']} — healthy body weight")
+    bp_note      = ("elevated — increases cardiovascular risk" if g["blood_pressure"] > 90
+                    else "borderline high"                      if g["blood_pressure"] > 80
+                    else "within normal diastolic range")
+    bmi_note     = (f"{g['bmi_category']} — significantly increases diabetes risk" if g["bmi_val"] >= 30
+                    else f"{g['bmi_category']} — moderately increases diabetes risk" if g["bmi_val"] >= 25
+                    else f"{g['bmi_category']} — healthy body weight")
 
     health_rows = [
         ["Glucose Level",            f"{g['glucose']} mg/dL — {glucose_note}"],
@@ -177,12 +162,12 @@ def _parse_prediction_advice(ai_result, fallback):
         ["Diabetes Status",          f"Patient {status}"],
     ]
     advice = []
-    if g["glucose"] > 140:    advice.append("Reduce intake of refined sugars and high-glycemic foods.")
-    if g["glucose"] > 100:    advice.append("Monitor blood sugar regularly and consider a low-glycemic diet.")
+    if g["glucose"] > 140:       advice.append("Reduce intake of refined sugars and high-glycemic foods.")
+    if g["glucose"] > 100:       advice.append("Monitor blood sugar regularly and consider a low-glycemic diet.")
     if g["blood_pressure"] > 90: advice.append("Reduce sodium intake and practice stress-management techniques.")
-    if g["bmi_val"] >= 30:    advice.append("Aim for gradual 5–10% body weight reduction through diet and exercise.")
-    elif g["bmi_val"] >= 25:  advice.append("Include 30 minutes of moderate aerobic activity at least 5 days per week.")
-    if g["age"] > 45:         advice.append("Schedule regular health screenings every 6–12 months.")
+    if g["bmi_val"] >= 30:       advice.append("Aim for gradual 5–10% body weight reduction through diet and exercise.")
+    elif g["bmi_val"] >= 25:     advice.append("Include 30 minutes of moderate aerobic activity at least 5 days per week.")
+    if g["age"] > 45:            advice.append("Schedule regular health screenings every 6–12 months.")
     advice.append("Stay well-hydrated — aim for 8 glasses (2 litres) of water per day.")
     advice.append("Prioritize 7–9 hours of quality sleep each night.")
 
@@ -199,28 +184,19 @@ def _parse_prediction_advice(ai_result, fallback):
 # ── API: Food Recommendation ─────────────────────────────────────────────────
 @app.route("/api/recommend", methods=["POST"])
 def api_recommend():
-    body    = request.get_json(force=True)
-    daily   = float(body.get("daily", 2000))
-    bmr1    = float(body.get("bmr1", daily * 0.35))
-    bmr2    = float(body.get("bmr2", daily * 0.40))
-    bmr3    = float(body.get("bmr3", daily * 0.25))
-
+    body  = request.get_json(force=True)
+    daily = float(body.get("daily", 2000))
     recommendations = {"Breakfast": 0.35, "Lunch": 0.40, "Dinner": 0.25}
 
     try:
         results = generate_nutrisi(_food_data, recommendations, daily)
-        # results is a list of 3 items: [breakfast_list, lunch_list, dinner_list]
+
         def _clean(records):
-            out = []
-            for r in records:
-                row = {}
-                for k, v in r.items():
-                    if isinstance(v, float) and math.isnan(v):
-                        row[k] = None
-                    else:
-                        row[k] = v
-                out.append(row)
-            return out
+            return [
+                {k: (None if isinstance(v, float) and math.isnan(v) else v)
+                 for k, v in r.items()}
+                for r in records
+            ]
 
         return jsonify({
             "breakfast": _clean(results[0]) if results and len(results) > 0 else [],
@@ -243,7 +219,6 @@ def api_analyze():
     try:
         image, composition = image_ocr_nutrition(image_file)
         analysis = image_analysis_composition(composition, health_info)
-
         return jsonify({
             "composition": composition,
             "analysis":    analysis or "Analysis unavailable.",
@@ -252,7 +227,7 @@ def api_analyze():
         return jsonify({"error": str(e)}), 500
 
 
-# ── API: Food Analysis (AI reasoning per meal) ──────────────────────────────
+# ── API: Food Analysis ───────────────────────────────────────────────────────
 @app.route("/api/food-analysis", methods=["POST"])
 def api_food_analysis():
     body        = request.get_json(force=True)
@@ -289,14 +264,15 @@ def api_food_analysis():
     except Exception as e:
         return jsonify({"error": str(e), "sections": [], "ok": False}), 500
 
-# ── API: Sample Image ───────────────────────────────────────────────────────────
+
+# ── API: Sample Image ─────────────────────────────────────────────────────────
 @app.route("/api/sample-image")
 def api_sample_image():
-    from flask import send_from_directory
     sample_dir  = ROOT_DIR / "data" / "analysis_input"
     sample_file = "Food picture composition for analysis.png"
     return send_from_directory(str(sample_dir), sample_file, mimetype="image/png")
 
-# ── Run ──────────────────────────────────────────────────────────────────────
+
+# ── Run (development only) ────────────────────────────────────────────────────
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5000)
