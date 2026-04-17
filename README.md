@@ -8,28 +8,20 @@ This project integrates machine learning and AI to support personalized diabetes
 
 # Table of content
 
-- [For Users](#for-users)
-  - [Application Demo](#application-demo)
-  - [Apps Features](#apps-features)
-  - [How to Use the Apps](#how-to-use-the-apps)
-- [For Developers](#for-developers)
-  - [Project Structure](#project-structure)
-  - [Getting Started](#getting-started)
-  - [Code Explanation](#code-explanation)
-  - [Run the project with Docker (Local)](#run-the-project-with-docker-local)
-  - [Deploy to Google Cloud Run](#deploy-to-google-cloud-run)
-  - [Contributors](#contributors)
-  - [License](#license)
+* [For Users](#for-users)
+    * [Apps Features](#apps-features)
+    * [How to Use the Apps](#how-to-use-the-apps)
+* [For Developers](#for-developers)
+    * [Project Structure](#project-structure)
+    * [Getting Started](#getting-started)
+    * [Code Explanation](#code-explanation)
+    * [Run the project with Docker (Local)](#run-the-project-with-docker-local)
+    * [Deploy to Google Cloud Run](#deploy-to-google-cloud-run)
+    * [Contributors](#contributors)
+    * [License](#license)
 
 
 # For Users
-
-## Application Demo
-
-You can try the deployed application here:
-
-https://ai-diabetes-healthkaton-2024-v1-118493320623.asia-southeast2.run.app
-
 
 ## Apps Features
 
@@ -39,13 +31,20 @@ The application consists of 3 main features.
 
 Enter your health metrics — glucose level, diastolic blood pressure, weight, height, age, gender, and daily activity level — to receive an ML-powered diabetes status prediction. The system calculates your BMI and daily calorie targets (BMR) and then queries Google Gemini to generate a personalised health data summary, lifestyle guidelines, and a clinical conclusion.
 
+<p align="center"><img src="images/diabetes_vis_2.png" alt="diabetes_vis_2"></p>
+
+
 ### 2. Personalised Food Recommendation
 
 Based on your diabetes prediction results and daily calorie needs, the system recommends traditional Indonesian meals for breakfast, lunch, and dinner using a K-Nearest Neighbours (KNN) model. Calorie budgets are split 35 / 40 / 25 % across the three meals so that each suggestion fits your health profile.
 
+<p align="center"><img src="images/diabetes_vis_4.png" alt="diabetes_vis_4"></p>
+
 ### 3. Food Label Image Analysis (Computer Vision)
 
 Upload a photo of any food product's nutritional label. The system uses Google Gemini's multimodal OCR capability to extract the nutritional composition, then cross-references it against your personal health data to determine whether the product is safe for a person with your diabetes profile.
+
+<p align="center"><img src="images/diabetes_vis_6.png" alt="diabetes_vis_6"></p>
 
 
 ## How to use the Apps
@@ -54,16 +53,14 @@ Upload a photo of any food product's nutritional label. The system uses Google G
 
 On the first page, fill in the form with your current health metrics:
 
-- Glucose level (mg/dL)
-- Diastolic blood pressure (mmHg)
-- Weight (kg) and Height (cm)
-- Age, Gender, and daily Activity level
+* Glucose level (mg/dL)
+* Diastolic blood pressure (mmHg)
+* Weight (kg) and Height (cm)
+* Age, Gender, and daily Activity level
 
 <p align="center"><img src="images/diabetes_vis_1.png" alt="diabetes_vis_1"></p>
 
 Click **Predict your health data**. The system will display your diabetes status, BMI category, daily calorie targets, AI-generated health insights, and personalised lifestyle advice.
-
-<p align="center"><img src="images/diabetes_vis_2.png" alt="diabetes_vis_2"></p>
 
 ### Step 2 — Explore Food Recommendations (Food Recommendation Page)
 
@@ -73,7 +70,6 @@ Navigate to the **Food Recommendations for You** page. Based on your prediction 
 
 Each suggestion respects your calorie budget for that meal.
 
-<p align="center"><img src="images/diabetes_vis_4.png" alt="diabetes_vis_4"></p>
 
 ### Step 3 — Analyse a Food Label (Image Analysis Page)
 
@@ -82,8 +78,6 @@ Go to the **Food Composition Photo Analysis** page. Upload a photo of a food pro
 <p align="center"><img src="images/diabetes_vis_5.png" alt="diabetes_vis_5"></p>
 
 Click **Analyze product image** to receive an AI-generated verdict on whether the product is recommended for your health profile.
-
-<p align="center"><img src="images/diabetes_vis_6.png" alt="diabetes_vis_6"></p>
 
 
 # For Developers
@@ -307,9 +301,10 @@ gcloud run services replace cloud-run-deploy.yaml --region <region>
 
 ## Contributors
 Contributors names and contact info:
-1. **[Zikry Adjie Nugraha](https://github.com/nugrahazikry)**: Developed the Flask web interface, implemented the Computer Vision AI Food Recommendation feature, and integrated all features with AI to gather health insights.
-2. **[Diki Rustian](https://github.com/dikirust)**: Built the Diabetes Prediction feature using machine learning.
-3. **[Muhammad Fikri Fadillah](https://github.com/boxside)**: Created the personalized food with Indonesian local cuisine recommendation feature.
+
+* [Zikry Adjie Nugraha](https://github.com/nugrahazikry): Developed the Flask web interface, implemented the Computer Vision AI Food Recommendation feature, and integrated all features with AI to gather health insights.
+* [Diki Rustian](https://github.com/dikirust): Built the Diabetes Prediction feature using machine learning.
+* [Muhammad Fikri Fadillah](https://github.com/boxside): Created the personalized food with Indonesian local cuisine recommendation feature.
 
 ## License
 
